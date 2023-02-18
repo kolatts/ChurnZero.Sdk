@@ -27,7 +27,7 @@ jobs:
         run: dotnet tool install --global GitVersion.Tool
 
       - name: Determine version number
-        run: gitversion /output buildserver /nofetch /config ChurnZero.Sdk/AssemblyInfo/GitVersion.yml
+        run: gitversion /output buildserver /nofetch /config gitversion.yml
 
       - name: Restore dependencies
         run: dotnet restore ChurnZero.Sdk/ChurnZero.Sdk.csproj
