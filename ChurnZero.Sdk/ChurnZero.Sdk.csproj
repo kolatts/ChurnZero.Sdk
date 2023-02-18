@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://github.com/kolatts/ChurnZero.Sdk</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/kolatts/ChurnZero.Sdk</RepositoryUrl>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
