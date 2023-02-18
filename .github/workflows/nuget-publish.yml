@@ -18,7 +18,7 @@ jobs:
         run: dotnet tool install --tool-path ./ChurnZero.Sdk/ --add-source https://api.nuget.org/v3/index.json GitVersion.Tool
       - name: Get version number
         id: gitversion
-        run: ./GitVersion.Tool /showvariable NuGetVersionV2
+        run: ./ChurnZero.Sdk/GitVersion.Tool /showvariable NuGetVersionV2
       - name: Build and publish NuGet package
         run: |
           dotnet build -c Release -p:Version=${{ steps.gitversion.outputs.stdout }} -p:PackageVersion=${{ steps.gitversion.outputs.stdout }} /p:TargetFramework=netstandard2.0 ChurnZero.Sdk/ChurnZero.Sdk.csproj
