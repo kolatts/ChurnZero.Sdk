@@ -42,7 +42,7 @@ jobs:
         run: dotnet build --configuration Release ChurnZero.Sdk/ChurnZero.Sdk.csproj -p:Version=${{ env.NUGET_VERSION }}
 
       - name: Create NuGet package
-        run: dotnet pack --configuration Release ChurnZero.Sdk/ChurnZero.Sdk.csproj -p:PackageVersion=${{ env.NUGET_VERSION }} --no-build --no-restore
+        run: dotnet pack --configuration Release ChurnZero.Sdk/ChurnZero.Sdk.csproj -p:Version=${{ env.NUGET_VERSION }} --no-build --no-restore
 
       - name: Publish NuGet package
         run: dotnet nuget push ChurnZero.Sdk/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
