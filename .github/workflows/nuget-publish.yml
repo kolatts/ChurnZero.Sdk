@@ -14,6 +14,8 @@ jobs:
         with:
           node-version: '16.x'
       - uses: actions/checkout@v2
+        with:
+           fetch-depth: 0
       - name: Install GitVersion
         run: dotnet tool install -g --add-source https://api.nuget.org/v3/index.json GitVersion.Tool
       - name: Get version number
