@@ -4,15 +4,19 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Json.Serialization;
 using ChurnZero.Sdk.Constants;
+using ChurnZero.Sdk.Models;
 
-namespace ChurnZero.Sdk.Models.Requests
+namespace ChurnZero.Sdk.Requests
 {
-    internal class SetAttributeRequest : ChurnZeroAttributeModel
+    internal class SetAttributeRequest : ChurnZeroAttributeModel, IChurnZeroHttpRequest
     {
+
         public string AppKey { get; set; }
         public string Action => ChurnZeroActions.SetAttribute;
         [Required]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public override ChurnZeroEntities? Entity { get; set; }
+        [JsonIgnore]
+        public override EntityTypes? EntityType { get; set; }
+
+        public string Entity => EntityType.GetValueOrDefault().ToString().ToLower();
     }
 }
