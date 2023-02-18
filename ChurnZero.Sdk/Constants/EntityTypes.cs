@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ChurnZero.Sdk.Constants
 {
-    public enum ChurnZeroEntities
+    public enum EntityTypes
     {
         Account,
         Contact

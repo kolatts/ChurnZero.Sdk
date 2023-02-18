@@ -12,6 +12,5 @@ namespace ChurnZero.Sdk.Models
         public string AccountExternalId { get; set; }
         public virtual string ContactExternalId { get; set; }
 
-
     }
 }
