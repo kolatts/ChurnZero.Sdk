@@ -30,7 +30,7 @@ jobs:
 
       - name: Determine version
         id: version
-        run: dotnet-gitversion /output json > version.json
+        run: dotnet-gitversion /config gitversion.yml /output json > version.json 
 
       - name: Set NuGet version environment variable
         run: echo "NUGET_VERSION=$(jq -r '.SemVer' version.json)" >> $GITHUB_ENV
