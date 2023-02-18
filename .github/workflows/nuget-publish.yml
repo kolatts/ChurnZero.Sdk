@@ -1,0 +1,24 @@
+name: Publish NuGet package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install GitVersion
+        run: dotnet tool install --tool-path . --add-source https://api.nuget.org/v3/index.json GitVersion.Tool
+      - name: Get version number
+        id: gitversion
+        run: ./GitVersion.Tool /showconfig --config .gitversion.yml -output buildserver -showvariable NuGetVersionV2
+      - name: Build and publish NuGet package
+        run: |
+          dotnet build -c Release -p:Version=${{ steps.gitversion.outputs.stdout }} -p:PackageVersion=${{ steps.gitversion.outputs.stdout }} /p:TargetFramework=netstandard2.0 ChurnZero.Sdk/ChurnZero.Sdk.csproj
+          dotnet pack -c Release -p:PackageVersion=${{ steps.gitversion.outputs.stdout }} /p:TargetFramework=netstandard2.0 ChurnZero.Sdk/ChurnZero.Sdk.csproj
+          dotnet nuget push ChurnZero.Sdk/bin/Release/ChurnZero.Sdk.${{ steps.gitversion.outputs.stdout }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
