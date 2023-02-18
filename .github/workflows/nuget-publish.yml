@@ -22,8 +22,6 @@ jobs:
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '6.0.x'
 
       - name: Install GitVersion.Tool
         run: dotnet tool install --global GitVersion.Tool
