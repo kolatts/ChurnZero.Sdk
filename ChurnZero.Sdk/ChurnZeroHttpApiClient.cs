@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -15,6 +16,8 @@ namespace ChurnZero.Sdk
         private readonly string _appKey;
         public ChurnZeroHttpApiClient(HttpClient httpClient, string appKey)
         {
+            if (string.IsNullOrWhiteSpace(appKey))
+                throw new ArgumentNullException(nameof(appKey), "An app key is required.");
             _httpClient = httpClient;
             _appKey = appKey;
         }
@@ -48,14 +51,7 @@ namespace ChurnZero.Sdk
             return response;
         }
 
-        //public async Task<HttpResponseMessage> TrackEvent(ChurnZeroEventModel eventModel)
-        //{
-        //    Validator.ValidateObject(eventModel, new ValidationContext(eventModel));
-        //    var response = await _httpClient.PostAsync("i", new StringContent(JsonSerializer.Serialize(new SetAttributeRequest()
-        //    {
-
-        //    })))
-        //}
+       
 
     }
 }

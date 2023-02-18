@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8922832A-3B52-4458-81B0-AFC6FBAFF772}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChurnZero.Sdk", "ChurnZero.Sdk\ChurnZero.Sdk.csproj", "{23E89A37-4AFB-476F-8089-29C4394AB7C8}"
 EndProject
