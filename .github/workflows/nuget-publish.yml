@@ -28,8 +28,15 @@ jobs:
       - name: Install GitVersion.Tool
         run: dotnet tool install --global GitVersion.Tool
 
-      - name: Determine version number
-        run: dotnet-gitversion /output buildserver /nofetch /config gitversion.yml
+      - name: Determine version
+        id: version
+        uses: gittools/actions/gitversion@v5
+        with:
+          output: json
+          showvariable: SemVer
+          
+      - name: Set NuGet version environment variable
+        run: echo "NUGET_VERSION=${{ steps.version.outputs.SemVer }}" >> $GITHUB_ENV
 
       - name: Restore dependencies
         run: dotnet restore ChurnZero.Sdk/ChurnZero.Sdk.csproj
