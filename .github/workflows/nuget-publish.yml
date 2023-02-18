@@ -30,13 +30,10 @@ jobs:
 
       - name: Determine version
         id: version
-        uses: gittools/actions/gitversion@v5
-        with:
-          output: json
-          showvariable: SemVer
-          
+        run: dotnet-gitversion /output json > version.json
+
       - name: Set NuGet version environment variable
-        run: echo "NUGET_VERSION=${{ steps.version.outputs.SemVer }}" >> $GITHUB_ENV
+        run: echo "NUGET_VERSION=$(jq -r '.SemVer' version.json)" >> $GITHUB_ENV
 
       - name: Restore dependencies
         run: dotnet restore ChurnZero.Sdk/ChurnZero.Sdk.csproj
