@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-
+    environment: production
     steps:
       - name: Setup Node.js v16
         uses: actions/setup-node@v2
