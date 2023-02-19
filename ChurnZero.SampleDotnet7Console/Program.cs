@@ -38,14 +38,26 @@ var contactResponse = await client.SetAttributesAsync(
 Console.WriteLine($"Received {contactResponse.StatusCode} creating contact");
 
 //Creates events for a specific customer Account and Contact.
-var eventResponse = await client.TrackEventAsync(new ChurnZeroEventModel()
-{
-    AccountExternalId = testAccountIdentifier, //Required
-    ContactExternalId = testContactIdentifier, //Required
-    Description = "Test Description", //Optional, can vary with event
-    EventName = "Test Event Type", //Required
-    EventDate = DateTime.Now, //Optional
-    Quantity = 5, //Optional
+var eventResponse = await client.TrackEventsAsync(
+    new ChurnZeroEventModel()
+    {
+        AccountExternalId = testAccountIdentifier, //Required
+        ContactExternalId = testContactIdentifier, //Required
+        Description = "Test Description", //Optional, can vary with event and is visible when viewing the individual events.
+        EventName = "Test Event Type", //Required, this becomes the display name of the event in Churn Zero.
+        EventDate = DateTime.Now, //Optional
+        Quantity = 5, //Optional
 
-});
+    },
+    new ChurnZeroEventModel()
+    {
+        AccountExternalId = testAccountIdentifier, 
+        ContactExternalId = testContactIdentifier, 
+        Description = "Test Description", 
+        EventName = "Test Event Type 2", 
+        EventDate = DateTime.Now, 
+        Quantity = 5, 
+
+    }
+    );
 Console.WriteLine($"Received {eventResponse.StatusCode} tracking event");

@@ -11,7 +11,38 @@ using Newtonsoft.Json.Serialization;
 
 namespace ChurnZero.Sdk
 {
-    public class ChurnZeroHttpApiClient
+    /// <summary>
+    /// A client that makes HTTP calls to Churn Zero's HTTP API (distinct from REST API) to <i>push data into Churn Zero</i>
+    /// </summary>
+    public interface IChurnZeroHttpApiClient
+    {
+        /// <summary>
+        /// Sets the attributes on an account or contact in a synchronous call.
+        /// </summary>
+        /// <param name="attributes"></param>
+        /// <returns></returns>
+        HttpResponseMessage SetAttributes(params ChurnZeroAttributeModel[] attributes);
+        /// <summary>
+        /// Sets the attributes on an account or contact asynchronously.
+        /// </summary>
+        /// <param name="attributes"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> SetAttributesAsync(params ChurnZeroAttributeModel[] attributes);
+        /// <summary>
+        /// Sends events in a synchronous call. Events require a contact and account external ID.
+        /// </summary>
+        /// <param name="events"></param>
+        /// <returns></returns>
+        HttpResponseMessage TrackEvents(ChurnZeroEventModel events);
+        /// <summary>
+        /// Sends events asynchronously. Events require a contact and account external ID.
+        /// </summary>
+        /// <param name="events"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> TrackEventsAsync(params ChurnZeroEventModel[] events);
+    }
+    /// <inheritdoc cref="IChurnZeroHttpApiClient"/>
+    public class ChurnZeroHttpApiClient : IChurnZeroHttpApiClient
     {
         private readonly HttpClient _httpClient;
         private readonly string _appKey;
@@ -31,14 +62,14 @@ namespace ChurnZero.Sdk
                 },
                 NullValueHandling = NullValueHandling.Ignore,
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                //DateTimeZoneHandling = DateTimeZoneHandling.Local
             };
         }
-
+        /// <inheritdoc/>
         public HttpResponseMessage SetAttributes(params ChurnZeroAttributeModel[] attributes)
         {
             return SetAttributesAsync(attributes).GetAwaiter().GetResult();
         }
+        /// <inheritdoc/>
         public async Task<HttpResponseMessage> SetAttributesAsync(params ChurnZeroAttributeModel[] attributes)
         {
             Validator.ValidateObject(attributes, new ValidationContext(attributes));
@@ -57,51 +88,27 @@ namespace ChurnZero.Sdk
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;
         }
-
-        public HttpResponseMessage TrackEvent(ChurnZeroEventModel eventModel)
+        /// <inheritdoc/>
+        public HttpResponseMessage TrackEvents(ChurnZeroEventModel events)
         {
-            return TrackEventAsync(eventModel).GetAwaiter().GetResult();
+            return TrackEventsAsync(events).GetAwaiter().GetResult();
         }
-
-        public async Task<HttpResponseMessage> TrackEventAsync(ChurnZeroEventModel eventModel)
+        /// <inheritdoc/>
+        public async Task<HttpResponseMessage> TrackEventsAsync(params ChurnZeroEventModel[] events)
         {
-            Validator.ValidateObject(eventModel, new ValidationContext(eventModel));
-            var request = new TrackEventRequest()
+            Validator.ValidateObject(events, new ValidationContext(events));
+            var requests = events.Select(x=> new TrackEventRequest()
             {
                 AppKey = _appKey,
-                AccountExternalId = eventModel.AccountExternalId,
-                ContactExternalId = eventModel.ContactExternalId,
-                Description = eventModel.Description,
-                EventDate = eventModel.EventDate,
-                EventName = eventModel.EventName,
-                Quantity = eventModel.Quantity,
-                AllowDupes = eventModel.AllowDupes,
-                //CustomFields = eventModel.CustomFields,
-            };
-            string serialized;
-            //Getting 422's when submitting custom fields. Disabling support for now.
-
-            //if (request.CustomFields.Any())
-            //{
-            //    var jObject = JObject.FromObject(request);
-            //    foreach (var customField in request.CustomFields)
-            //    {
-            //        jObject.Add(CustomField.FormatDisplayNameToCustomFieldName(customField.Key), customField.Value);
-            //    }
-            //    serialized = JsonConvert.SerializeObject(jObject, Formatting.Indented, _jsonSerializerSettings);
-            //    var finalObj = JObject.Parse(serialized);
-            //    var queryString = HttpUtility.ParseQueryString(string.Empty);
-            //    foreach (var prop in finalObj.Properties())
-            //    {
-            //        queryString[prop.Name] = prop.Value.ToString();
-            //    }
-
-            //    var url = $"i?{queryString}";
-            //    return await _httpClient.GetAsync(url);
-
-            //}
-            //else
-            serialized = JsonConvert.SerializeObject(request, Formatting.Indented, _jsonSerializerSettings);
+                AccountExternalId = x.AccountExternalId,
+                ContactExternalId = x.ContactExternalId,
+                Description = x.Description,
+                EventDate = x.EventDate,
+                EventName = x.EventName,
+                Quantity = x.Quantity,
+                AllowDupes = x.AllowDupes,
+            });
+            var serialized = JsonConvert.SerializeObject(requests, Formatting.Indented, _jsonSerializerSettings);
             var requestContent = new StringContent(serialized, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;

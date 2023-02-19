@@ -16,24 +16,37 @@ The purpose of this library is to create an easy-to-use means for .NET developer
 | HTTP | Setting Account Attributes (multiple) |✅ |✅
 | HTTP | Setting Contact Attributes (multiple) |✅|✅
 | HTTP | Tracking Events (single) | ✅ | ❌
-| HTTP | Tracking Events (multiple) | ❌ | ❌
+| HTTP | Tracking Events (multiple) | ✅ | ❌
 | HTTP | Increment Attribute for Account or Contact | ❌ | ❌
 | HTTP | Time in App | ❌ | ❌
 | HTTP/CSV | Batch Setting Account Attributes | ❌ |❌
 | HTTP/CSV | Batch Setting Contact Attributes | ❌ |❌
 | HTTP/CSV | Batch Events | ❌ |❌
-
+| REST | Any | ❌ | ❌ |
 
 ## Getting Started - Setup
 
-Without dependency injection:
+Without dependency injection (see [sample project](ChurnZero.SampleDotnet7Console/Program.cs)):
 ```cs
 var client = new ChurnZeroHttpApiClient(new HttpClient() { BaseAddress = "https://mychurnzerourl.com/"}, "myAppKey"});
 ```
 
 With dependency injection:
 
-TBD
+```cs
+services.AddHttpClient("ChurnZeroApiClient", client =>
+{
+    client.BaseAddress = new Uri("http://yourchurnzerourl");
+});
+services.AddScoped<IChurnZeroHttpApiClient, ChurnZeroHttpApiClient>(sp =>
+{
+    var httpClient = sp.GetRequiredService<IHttpClientFactory>()
+                        .CreateClient("ChurnZeroApiClient");
+    var appKey = configuration.GetValue<string>("ChurnZeroAppKey");
+    return new ChurnZeroHttpApiClient(httpClient, appKey);
+});
+
+```
 
 ## Getting Started - Usage
 
@@ -76,6 +89,5 @@ var eventResponse = await client.TrackEventAsync(new ChurnZeroEventModel()
 
 });
 Console.WriteLine($"Received {eventResponse.StatusCode} tracking event");
-
 
 ```
