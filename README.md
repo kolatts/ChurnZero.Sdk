@@ -17,12 +17,14 @@ The purpose of this library is to create an easy-to-use means for .NET developer
 | HTTP | Setting Contact Attributes (multiple) |❌|❌
 | HTTP | Tracking Events (single) | ✅ | ❌
 | HTTP | Tracking Events (multiple) | ❌ | ❌
+| HTTP | Increment Attribute for Account or Contact | ❌ | ❌
+| HTTP | Time in App | ❌ | ❌
 | HTTP/CSV | Batch Setting Account Attributes | ❌ |❌
 | HTTP/CSV | Batch Setting Contact Attributes | ❌ |❌
 | HTTP/CSV | Batch Events | ❌ |❌
 
 
-## Getting Started
+## Getting Started - Setup
 
 Without dependency injection:
 ```cs
@@ -32,3 +34,44 @@ var client = new ChurnZeroHttpApiClient(new HttpClient() { BaseAddress = "https:
 With dependency injection:
 
 TBD
+
+## Getting Started - Usage
+
+```cs
+
+//Usage
+const string testAccountIdentifier = "Test Account ID";
+const string testContactIdentifier = "Test Contact ID";
+
+
+//Creates your customer's Account in Churn Zero or adjusts the name. CRM integration instead is recommended.
+var accountResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel(testAccountIdentifier, StandardAccountFields.Name, "Test Customer Account"));
+Console.WriteLine($"Received {accountResponse.StatusCode} creating account");
+
+//Creates your customer's Account in Churn Zero. CRM integration instead is recommended.
+var startDateResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel(testAccountIdentifier, StandardAccountFields.StartDate, DateTime.Now));
+Console.WriteLine($"Received {startDateResponse.StatusCode} updating Start Date on account");
+
+//Creates a custom field in Churn Zero.
+var testCustomFieldResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel("Test Custom Field", "Test Custom Field Value", EntityTypes.Account, testAccountIdentifier));
+Console.WriteLine($"Received {testCustomFieldResponse.StatusCode} updating Custom Field on account");
+
+//Creates your customer Account's Contact in Churn Zero. Must have an Account created first.
+var contactResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel(testAccountIdentifier, testContactIdentifier, StandardContactFields.FirstName, "Test Customer First Name"));
+Console.WriteLine($"Received {contactResponse.StatusCode} creating contact");
+
+//Creates events for a specific customer Account and Contact.
+var eventResponse = await client.TrackEventAsync(new ChurnZeroEventModel()
+{
+    AccountExternalId = testAccountIdentifier, //Required
+    ContactExternalId = testContactIdentifier, //Required
+    Description = "Test Description", //Optional, can vary with event
+    EventName = "Test Event Type", //Required
+    EventDate = DateTime.Now, //Optional
+    Quantity = 5, //Optional
+
+});
+Console.WriteLine($"Received {eventResponse.StatusCode} tracking event");
+
+
+```

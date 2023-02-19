@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ChurnZero.Sdk.Requests
+﻿namespace ChurnZero.Sdk.Requests
 {
     internal interface IChurnZeroHttpRequest
     {

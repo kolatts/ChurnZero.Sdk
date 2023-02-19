@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ChurnZero.Sdk.Options
+﻿namespace ChurnZero.Sdk.Options
 {
     public class ChurnZeroClientOptions
     {

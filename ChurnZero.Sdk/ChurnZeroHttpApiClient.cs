@@ -74,8 +74,32 @@ namespace ChurnZero.Sdk
                 EventName = eventModel.EventName,
                 Quantity = eventModel.Quantity,
                 AllowDupes = eventModel.AllowDupes,
+                //CustomFields = eventModel.CustomFields,
             };
-            var serialized = JsonConvert.SerializeObject(request, Formatting.Indented, _jsonSerializerSettings);
+            string serialized;
+            //Getting 422's when submitting custom fields. Disabling support for now.
+
+            //if (request.CustomFields.Any())
+            //{
+            //    var jObject = JObject.FromObject(request);
+            //    foreach (var customField in request.CustomFields)
+            //    {
+            //        jObject.Add(CustomField.FormatDisplayNameToCustomFieldName(customField.Key), customField.Value);
+            //    }
+            //    serialized = JsonConvert.SerializeObject(jObject, Formatting.Indented, _jsonSerializerSettings);
+            //    var finalObj = JObject.Parse(serialized);
+            //    var queryString = HttpUtility.ParseQueryString(string.Empty);
+            //    foreach (var prop in finalObj.Properties())
+            //    {
+            //        queryString[prop.Name] = prop.Value.ToString();
+            //    }
+
+            //    var url = $"i?{queryString}";
+            //    return await _httpClient.GetAsync(url);
+
+            //}
+            //else
+            serialized = JsonConvert.SerializeObject(request, Formatting.Indented, _jsonSerializerSettings);
             var requestContent = new StringContent(serialized, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;
