@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,28 +35,29 @@ namespace ChurnZero.Sdk
             };
         }
 
-        public HttpResponseMessage SetAttribute(ChurnZeroAttributeModel attributeModel)
+        public HttpResponseMessage SetAttributes(params ChurnZeroAttributeModel[] attributes)
         {
-            return SetAttributeAsync(attributeModel).GetAwaiter().GetResult();
+            return SetAttributesAsync(attributes).GetAwaiter().GetResult();
         }
-        public async Task<HttpResponseMessage> SetAttributeAsync(ChurnZeroAttributeModel attributeModel)
+        public async Task<HttpResponseMessage> SetAttributesAsync(params ChurnZeroAttributeModel[] attributes)
         {
-            Validator.ValidateObject(attributeModel, new ValidationContext(attributeModel));
-            var request = new SetAttributeRequest()
+            Validator.ValidateObject(attributes, new ValidationContext(attributes));
+            var requests = attributes.Select(x=> new SetAttributeRequest()
             {
                 AppKey = _appKey,
-                AccountExternalId = attributeModel.AccountExternalId,
-                ContactExternalId = attributeModel.ContactExternalId,
-                Name = attributeModel.Name,
-                EntityType = attributeModel.EntityType,
-                Value = attributeModel.Value
-            };
-            var serialized = JsonConvert.SerializeObject(request, Formatting.Indented, _jsonSerializerSettings);
+                AccountExternalId = x.AccountExternalId,
+                ContactExternalId = x.ContactExternalId,
+                Name = x.Name,
+                EntityType = x.EntityType,
+                Value = x.Value
+            }).ToList();
+            var serialized = JsonConvert.SerializeObject(requests, Formatting.Indented, _jsonSerializerSettings);
             var requestContent =
                 new StringContent(serialized, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;
         }
+
         public HttpResponseMessage TrackEvent(ChurnZeroEventModel eventModel)
         {
             return TrackEventAsync(eventModel).GetAwaiter().GetResult();
