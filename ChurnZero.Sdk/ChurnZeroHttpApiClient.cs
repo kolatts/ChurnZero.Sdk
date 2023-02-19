@@ -2,11 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ChurnZero.Sdk.Models;
 using ChurnZero.Sdk.Requests;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace ChurnZero.Sdk
 {
@@ -15,24 +15,30 @@ namespace ChurnZero.Sdk
         private readonly HttpClient _httpClient;
         private readonly string _appKey;
 
-        private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
         public ChurnZeroHttpApiClient(HttpClient httpClient, string appKey)
         {
             if (string.IsNullOrWhiteSpace(appKey))
                 throw new ArgumentNullException(nameof(appKey), "An app key is required.");
             _httpClient = httpClient;
             _appKey = appKey;
+            _jsonSerializerSettings = new JsonSerializerSettings()
+            {
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy(),
+                },
+                NullValueHandling = NullValueHandling.Ignore,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                //DateTimeZoneHandling = DateTimeZoneHandling.Local
+            };
         }
 
-        public HttpResponseMessage SetAttribute(ChurnZeroAttributeModel attributeModel, bool ensureSuccessStatusCode = true)
+        public HttpResponseMessage SetAttribute(ChurnZeroAttributeModel attributeModel)
         {
-            return SetAttributeAsync(attributeModel, ensureSuccessStatusCode).GetAwaiter().GetResult();
+            return SetAttributeAsync(attributeModel).GetAwaiter().GetResult();
         }
-        public async Task<HttpResponseMessage> SetAttributeAsync(ChurnZeroAttributeModel attributeModel, bool ensureSuccessStatusCode = true)
+        public async Task<HttpResponseMessage> SetAttributeAsync(ChurnZeroAttributeModel attributeModel)
         {
             Validator.ValidateObject(attributeModel, new ValidationContext(attributeModel));
             var request = new SetAttributeRequest()
@@ -44,19 +50,18 @@ namespace ChurnZero.Sdk
                 EntityType = attributeModel.EntityType,
                 Value = attributeModel.Value
             };
-            var serialized = JsonSerializer.Serialize(request, _serializerOptions);
+            var serialized = JsonConvert.SerializeObject(request, Formatting.Indented, _jsonSerializerSettings);
             var requestContent =
                 new StringContent(serialized, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("i", requestContent);
-            if (ensureSuccessStatusCode) response.EnsureSuccessStatusCode();
             return response;
         }
-        public HttpResponseMessage TrackEvent(ChurnZeroEventModel eventModel, bool ensureSuccessStatusCode = true)
+        public HttpResponseMessage TrackEvent(ChurnZeroEventModel eventModel)
         {
-            return TrackEventAsync(eventModel, ensureSuccessStatusCode).GetAwaiter().GetResult();
+            return TrackEventAsync(eventModel).GetAwaiter().GetResult();
         }
 
-        public async Task<HttpResponseMessage> TrackEventAsync(ChurnZeroEventModel eventModel, bool ensureSuccessStatusCode = true)
+        public async Task<HttpResponseMessage> TrackEventAsync(ChurnZeroEventModel eventModel)
         {
             Validator.ValidateObject(eventModel, new ValidationContext(eventModel));
             var request = new TrackEventRequest()
@@ -69,16 +74,12 @@ namespace ChurnZero.Sdk
                 EventName = eventModel.EventName,
                 Quantity = eventModel.Quantity,
                 AllowDupes = eventModel.AllowDupes,
-                //CustomFields = eventModel.CustomFields, //todo these need to be mapped to properties on the request itself
             };
-            var serialized = JsonSerializer.Serialize(request, _serializerOptions);
+            var serialized = JsonConvert.SerializeObject(request, Formatting.Indented, _jsonSerializerSettings);
             var requestContent = new StringContent(serialized, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("i", requestContent);
-            if (ensureSuccessStatusCode) response.EnsureSuccessStatusCode();
             return response;
         }
-
-
 
 
 
