@@ -15,15 +15,15 @@ const string testContactIdentifier = "Test Contact ID";
 
 
 //Creates your customer's Account in Churn Zero.
-var accountResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel( StandardAccountFields.Name, testAccountIdentifier, "Test Customer Account"));
+var accountResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel( testAccountIdentifier, StandardAccountFields.Name, "Test Customer Account"));
 Console.WriteLine($"Received {accountResponse.StatusCode} creating account");
 
 //Creates your customer's Account in Churn Zero.
-var startDateResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel(StandardAccountFields.StartDate, testAccountIdentifier, DateTime.Now));
+var startDateResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel(testAccountIdentifier, StandardAccountFields.StartDate, DateTime.Now));
 Console.WriteLine($"Received {startDateResponse.StatusCode} updating Start Date on account");
 
 //Creates your customer Account's Contact in Churn Zero. Must have an Account created first.
-var contactResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel(StandardContactFields.FirstName, testContactIdentifier, testAccountIdentifier, "Test Customer First Name"));
+var contactResponse = await client.SetAttributeAsync(new ChurnZeroAttributeModel(testAccountIdentifier, testContactIdentifier, StandardContactFields.FirstName, "Test Customer First Name"));
 Console.WriteLine($"Received {contactResponse.StatusCode} creating contact");
 
 //Creates events for a specific customer Account and Contact.

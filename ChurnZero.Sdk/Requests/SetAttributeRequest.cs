@@ -8,15 +8,18 @@ using ChurnZero.Sdk.Models;
 
 namespace ChurnZero.Sdk.Requests
 {
-    internal class SetAttributeRequest : ChurnZeroAttributeModel, IChurnZeroHttpRequest
+    internal class SetAttributeRequest :  IChurnZeroHttpRequest
     {
-
+        public string AccountExternalId { get; set; }
+        public virtual string ContactExternalId { get; set; }
         public string AppKey { get; set; }
         public string Action => ChurnZeroActions.SetAttribute;
-        [Required]
-        [JsonIgnore]
-        public override EntityTypes? EntityType { get; set; }
 
         public string Entity => EntityType.GetValueOrDefault().ToString().ToLower();
+
+        public string Name { get; set; }
+        public string Value { get; set; }
+        [JsonIgnore]
+        public EntityTypes? EntityType { get; set; }
     }
 }
