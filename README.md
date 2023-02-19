@@ -5,10 +5,11 @@ Licensed under the [Apache 2.0 License](LICENSE) (free for commercial and person
 
 
 ## Purpose
-
 The purpose of this library is to create an easy-to-use means for .NET developers to incorporate Churn Zero into applications.
 
+*Note that until 1.x is formally released, all implementation is subject to change. Use at your own risk of refactoring.*
 
+## Supported Direct Functionality
 | API | Functionality | Basic Support | Custom Field Support
 |-|-|-|-|
 | HTTP | Setting Account Attributes (single) |✅|✅
@@ -23,6 +24,12 @@ The purpose of this library is to create an easy-to-use means for .NET developer
 | HTTP/CSV | Batch Setting Contact Attributes | ❌ |❌
 | HTTP/CSV | Batch Events | ❌ |❌
 | REST | Any | ❌ | ❌ |
+
+## Supported Indirect Functionality
+| Functionality | Supported |
+|-|-|
+| C# Attributes for decorating models | ❌ |
+
 
 ## Getting Started - Setup
 
