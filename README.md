@@ -138,3 +138,7 @@ Console.WriteLine($"Received {timeInAppResponse.StatusCode} tracking time in app
 
 
 ```
+
+## Running the sample project locally
+
+See [README.md](ChurnZero.SampleDotnet7Console/README.md) in sample project. 

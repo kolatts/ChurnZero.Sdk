@@ -15,7 +15,7 @@ namespace ChurnZero.Sdk.Models
         public string LastName { get; set; }
         public string Email { get; set; }
         public Dictionary<string, string> CustomFields { get; set; } = new Dictionary<string, string>();
-        public IEnumerable<ChurnZeroAttribute> ToAttributes()
+        internal IEnumerable<ChurnZeroAttribute> ToAttributes(bool prefixCustomFields = false)
         {
             return new List<ChurnZeroAttribute>()
                 {
@@ -23,7 +23,7 @@ namespace ChurnZero.Sdk.Models
                     new ChurnZeroAttribute(AccountExternalId, ContactExternalId, StandardContactFields.LastName, LastName),
                     new ChurnZeroAttribute(AccountExternalId, ContactExternalId, StandardContactFields.Email, Email),
                 }
-                .Union(CustomFields.Select(x => new ChurnZeroAttribute(x.Key, x.Value, EntityTypes.Contact, AccountExternalId, ContactExternalId)))
+                .Union(CustomFields.Select(x => new ChurnZeroAttribute(prefixCustomFields ? ChurnZeroCustomField.FormatDisplayNameToCustomFieldName(x.Key) :x.Key, x.Value, EntityTypes.Contact, AccountExternalId, ContactExternalId)))
                 .Where(x => !string.IsNullOrWhiteSpace(x.Value));
         }
     }

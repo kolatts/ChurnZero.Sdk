@@ -1,7 +1,7 @@
 ﻿# Setup
 
 Retrieve the Churn Zero URL from your churn zero account, and the Application Key (AppKey)
-Open a terminal in this project's directory and run the following commands:
+Open a terminal in this [project's directory](/) and run the following commands:
 ```
 dotnet user-secrets set ChurnZeroUrl <my-churn-zero-url>
 dotnet user-secrets set ChurnZeroAppKey <my-churn-zero-appkey>
