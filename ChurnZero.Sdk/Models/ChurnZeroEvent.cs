@@ -3,10 +3,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ChurnZero.Sdk.Models
 {
-    public class ChurnZeroEventModel : ChurnZeroModel
+    public class ChurnZeroEvent 
     {
         [Required]
-        public override string ContactExternalId { get; set; }
+        public string AccountExternalId { get; set; }
+        [Required]
+        public string ContactExternalId { get; set; }
 
         [Required]
         public virtual string EventName { get; set; }

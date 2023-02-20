@@ -6,8 +6,11 @@ using System.ComponentModel.DataAnnotations;
 namespace ChurnZero.Sdk.Models
 {
 
-    public sealed class ChurnZeroAttributeModel : ChurnZeroModel, IValidatableObject
+    public sealed class ChurnZeroAttribute :  IValidatableObject
     {
+        [Required]
+        public string AccountExternalId { get; set; }
+        public string ContactExternalId { get; set; }
         /// <summary>
         /// Supports custom fields for name.
         /// </summary>
@@ -16,7 +19,7 @@ namespace ChurnZero.Sdk.Models
         /// <param name="value"></param>
         /// <param name="accountExternalId"></param>
         /// <param name="contactExternalId"></param>
-        public ChurnZeroAttributeModel(string name, string value, EntityTypes entity, string accountExternalId, string contactExternalId = null)
+        public ChurnZeroAttribute(string name, string value, EntityTypes entity, string accountExternalId, string contactExternalId = null)
         {
             EntityType = entity;
             Name = name;
@@ -32,7 +35,7 @@ namespace ChurnZero.Sdk.Models
         /// <param name="value"></param>
         /// <param name="accountExternalId"></param>
         /// <param name="contactExternalId"></param>
-        public ChurnZeroAttributeModel(string name, DateTime value, EntityTypes entity, string accountExternalId, string contactExternalId = null)
+        public ChurnZeroAttribute(string name, DateTime value, EntityTypes entity, string accountExternalId, string contactExternalId = null)
         : this(name, value.ToString("O"), entity, accountExternalId, contactExternalId)
         {
 
@@ -44,7 +47,7 @@ namespace ChurnZero.Sdk.Models
         /// <param name="contactExternalId"></param>
         /// <param name="accountIdentifier"></param>
         /// <param name="value"></param>
-        public ChurnZeroAttributeModel(string accountIdentifier, string contactExternalId, StandardContactFields field, string value)
+        public ChurnZeroAttribute(string accountIdentifier, string contactExternalId, StandardContactFields field, string value)
         {
             AccountExternalId = accountIdentifier;
             ContactExternalId = contactExternalId;
@@ -58,7 +61,7 @@ namespace ChurnZero.Sdk.Models
         /// <param name="field"></param>
         /// <param name="accountExternalId"></param>
         /// <param name="value"></param>
-        public ChurnZeroAttributeModel(string accountExternalId, StandardAccountFields field, string value)
+        public ChurnZeroAttribute(string accountExternalId, StandardAccountFields field, string value)
         {
             AccountExternalId = accountExternalId;
             EntityType = EntityTypes.Account;
@@ -72,7 +75,7 @@ namespace ChurnZero.Sdk.Models
         /// <param name="field"></param>
         /// <param name="accountExternalId"></param>
         /// <param name="date"></param>
-        public ChurnZeroAttributeModel(string accountExternalId, StandardAccountFields field, DateTime date)
+        public ChurnZeroAttribute(string accountExternalId, StandardAccountFields field, DateTime date)
             : this(accountExternalId, field, date.ToString("O")) { }
 
 

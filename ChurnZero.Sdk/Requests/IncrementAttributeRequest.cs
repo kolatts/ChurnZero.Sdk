@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Dynamic;
 using ChurnZero.Sdk.Constants;
 using ChurnZero.Sdk.Models;
 using Newtonsoft.Json;
 
 namespace ChurnZero.Sdk.Requests
 {
-    internal class SetAttributeRequest : IChurnZeroHttpRequest
+    internal class IncrementAttributeRequest : IChurnZeroHttpRequest
     {
-        public SetAttributeRequest(ChurnZeroAttribute a, string appKey)
+        public IncrementAttributeRequest(ChurnZeroAttribute a, string appKey)
         {
             Validator.ValidateObject(a, new ValidationContext(a));
             AppKey = appKey;
@@ -21,11 +20,11 @@ namespace ChurnZero.Sdk.Requests
         public string AccountExternalId { get; set; }
         public string ContactExternalId { get; set; }
         public string AppKey { get; set; }
-        public string Action => ChurnZeroActions.SetAttribute;
-
+        public string Action => ChurnZeroActions.IncrementAttribute;
         public string Name { get; set; }
         public string Value { get; set; }
 
         public string Entity { get; set; }
+
     }
 }

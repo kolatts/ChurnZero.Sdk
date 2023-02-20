@@ -21,25 +21,50 @@ namespace ChurnZero.Sdk
         /// </summary>
         /// <param name="attributes"></param>
         /// <returns></returns>
-        HttpResponseMessage SetAttributes(params ChurnZeroAttributeModel[] attributes);
+        HttpResponseMessage SetAttributes(params ChurnZeroAttribute[] attributes);
         /// <summary>
         /// Sets the attributes on an account or contact asynchronously.
         /// </summary>
         /// <param name="attributes"></param>
         /// <returns></returns>
-        Task<HttpResponseMessage> SetAttributesAsync(params ChurnZeroAttributeModel[] attributes);
+        Task<HttpResponseMessage> SetAttributesAsync(params ChurnZeroAttribute[] attributes);
+        /// <summary>
+        /// Supports numeric attributes only. Value of attribute is what the increment is.
+        /// </summary>
+        /// <param name="attributes"></param>
+        /// <returns></returns>
+        HttpResponseMessage IncrementAttributes(params ChurnZeroAttribute[] attributes);
+
+        /// <summary>
+        /// Supports numeric attributes only. Value of attribute is what the increment is.
+        /// </summary>
+        /// <param name="attributes"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> IncrementAttributesAsync(params ChurnZeroAttribute[] attributes);
         /// <summary>
         /// Sends events in a synchronous call. Events require a contact and account external ID.
         /// </summary>
         /// <param name="events"></param>
         /// <returns></returns>
-        HttpResponseMessage TrackEvents(ChurnZeroEventModel events);
+        HttpResponseMessage TrackEvents(params ChurnZeroEvent[] events);
         /// <summary>
         /// Sends events asynchronously. Events require a contact and account external ID.
         /// </summary>
         /// <param name="events"></param>
         /// <returns></returns>
-        Task<HttpResponseMessage> TrackEventsAsync(params ChurnZeroEventModel[] events);
+        Task<HttpResponseMessage> TrackEventsAsync(params ChurnZeroEvent[] events);
+        /// <summary>
+        /// Tracks time in apps synchronously. Start and End Dates are required.
+        /// </summary>
+        /// <param name="timeInApps"></param>
+        /// <returns></returns>
+        HttpResponseMessage TrackTimeInApps(params ChurnZeroTimeInApp[] timeInApps);
+        /// <summary>
+        /// Tracks time in apps asynchronously. Start and End Dates are required.
+        /// </summary>
+        /// <param name="timeInApps"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> TrackTimeInAppsAsync(params ChurnZeroTimeInApp[] timeInApps);
     }
     /// <inheritdoc cref="IChurnZeroHttpApiClient"/>
     public class ChurnZeroHttpApiClient : IChurnZeroHttpApiClient
@@ -65,23 +90,12 @@ namespace ChurnZero.Sdk
             };
         }
         /// <inheritdoc/>
-        public HttpResponseMessage SetAttributes(params ChurnZeroAttributeModel[] attributes)
-        {
-            return SetAttributesAsync(attributes).GetAwaiter().GetResult();
-        }
+        public HttpResponseMessage SetAttributes(params ChurnZeroAttribute[] attributes) => SetAttributesAsync(attributes).GetAwaiter().GetResult();
+
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> SetAttributesAsync(params ChurnZeroAttributeModel[] attributes)
+        public async Task<HttpResponseMessage> SetAttributesAsync(params ChurnZeroAttribute[] attributes)
         {
-            Validator.ValidateObject(attributes, new ValidationContext(attributes));
-            var requests = attributes.Select(x=> new SetAttributeRequest()
-            {
-                AppKey = _appKey,
-                AccountExternalId = x.AccountExternalId,
-                ContactExternalId = x.ContactExternalId,
-                Name = x.Name,
-                EntityType = x.EntityType,
-                Value = x.Value
-            }).ToList();
+            var requests = attributes.Select(x=> new SetAttributeRequest(x, _appKey)).ToList();
             var serialized = JsonConvert.SerializeObject(requests, Formatting.Indented, _jsonSerializerSettings);
             var requestContent =
                 new StringContent(serialized, Encoding.UTF8, "application/json");
@@ -89,32 +103,40 @@ namespace ChurnZero.Sdk
             return response;
         }
         /// <inheritdoc/>
-        public HttpResponseMessage TrackEvents(ChurnZeroEventModel events)
+        public HttpResponseMessage IncrementAttributes(params ChurnZeroAttribute[] attributes) => IncrementAttributesAsync(attributes).GetAwaiter().GetResult();
+
+        /// <inheritdoc/>
+        public async Task<HttpResponseMessage> IncrementAttributesAsync(params ChurnZeroAttribute[] attributes)
         {
-            return TrackEventsAsync(events).GetAwaiter().GetResult();
+            var requests = attributes.Select(x => new IncrementAttributeRequest(x, _appKey)).ToList();
+            var serialized = JsonConvert.SerializeObject(requests, Formatting.Indented, _jsonSerializerSettings);
+            var requestContent =
+                new StringContent(serialized, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("i", requestContent);
+            return response;
         }
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> TrackEventsAsync(params ChurnZeroEventModel[] events)
+        public HttpResponseMessage TrackEvents(params ChurnZeroEvent[] events) => TrackEventsAsync(events).GetAwaiter().GetResult();
+
+        /// <inheritdoc/>
+        public async Task<HttpResponseMessage> TrackEventsAsync(params ChurnZeroEvent[] events)
         {
-            Validator.ValidateObject(events, new ValidationContext(events));
-            var requests = events.Select(x=> new TrackEventRequest()
-            {
-                AppKey = _appKey,
-                AccountExternalId = x.AccountExternalId,
-                ContactExternalId = x.ContactExternalId,
-                Description = x.Description,
-                EventDate = x.EventDate,
-                EventName = x.EventName,
-                Quantity = x.Quantity,
-                AllowDupes = x.AllowDupes,
-            });
+            var requests = events.Select(x=> new TrackEventRequest(x, _appKey)).ToList();
             var serialized = JsonConvert.SerializeObject(requests, Formatting.Indented, _jsonSerializerSettings);
             var requestContent = new StringContent(serialized, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;
         }
-
-
-
+        /// <inheritdoc/>
+        public HttpResponseMessage TrackTimeInApps(params ChurnZeroTimeInApp[] timeInApps) => TrackTimeInAppsAsync(timeInApps).GetAwaiter().GetResult();
+        /// <inheritdoc/>
+        public async Task<HttpResponseMessage> TrackTimeInAppsAsync(params ChurnZeroTimeInApp[] timeInApps)
+        {
+            var requests = timeInApps.Select(x => new TimeInAppRequest(x, _appKey)).ToList();
+            var serialized = JsonConvert.SerializeObject(requests, Formatting.Indented, _jsonSerializerSettings);
+            var requestContent = new StringContent(serialized, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("i", requestContent);
+            return response;
+        }
     }
 }
