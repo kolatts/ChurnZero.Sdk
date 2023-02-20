@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
@@ -16,6 +17,32 @@ namespace ChurnZero.Sdk
     /// </summary>
     public interface IChurnZeroHttpApiClient
     {
+        /// <summary>
+        /// Updates accounts in Churn Zero synchronously. For more granular control (including setting fields to blank) see <see cref="SetAttributes"/>
+        /// </summary>
+        /// <param name="accounts"></param>
+        /// <returns></returns>
+        HttpResponseMessage UpdateAccounts(params ChurnZeroAccount[] accounts);
+        /// <summary>
+        /// Updates accounts in Churn Zero asynchronously. For more granular control (including setting fields to blank) see <see cref="SetAttributesAsync"/>
+        /// </summary>
+        /// <param name="accounts"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> UpdateAccountsAsync(params ChurnZeroAccount[] accounts);
+
+        /// <summary>
+        /// Updates contacts in Churn Zero synchronously. For more granular control (including setting fields to blank) see <see cref="SetAttributes"/>
+        /// </summary>
+        /// <param name="contacts"></param>
+        /// <returns></returns>
+        HttpResponseMessage UpdateContacts(params ChurnZeroContact[] contacts);
+        /// <summary>
+        /// Updates contacts in Churn Zero asynchronously. For more granular control (including setting fields to blank) see <see cref="SetAttributesAsync"/>
+        /// </summary>
+        /// <param name="contacts"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> UpdateContactsAsync(params ChurnZeroContact[] contacts);
+
         /// <summary>
         /// Sets the attributes on an account or contact in a synchronous call.
         /// </summary>
@@ -65,6 +92,7 @@ namespace ChurnZero.Sdk
         /// <param name="timeInApps"></param>
         /// <returns></returns>
         Task<HttpResponseMessage> TrackTimeInAppsAsync(params ChurnZeroTimeInApp[] timeInApps);
+
     }
     /// <inheritdoc cref="IChurnZeroHttpApiClient"/>
     public class ChurnZeroHttpApiClient : IChurnZeroHttpApiClient
@@ -89,23 +117,36 @@ namespace ChurnZero.Sdk
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,
             };
         }
-        /// <inheritdoc/>
+
+     
+        public HttpResponseMessage UpdateAccounts(params ChurnZeroAccount[] accounts) => UpdateAccountsAsync(accounts).GetAwaiter().GetResult();
+        public async Task<HttpResponseMessage> UpdateAccountsAsync(params ChurnZeroAccount[] accounts)
+        {
+            var attributes = accounts.SelectMany(x => x.ToAttributes()).ToArray();
+            return await SetAttributesAsync(attributes);
+        }
+
+        public HttpResponseMessage UpdateContacts(params ChurnZeroContact[] contacts) =>
+            UpdateContactsAsync(contacts).GetAwaiter().GetResult();
+        public async Task<HttpResponseMessage> UpdateContactsAsync(params ChurnZeroContact[] contacts)
+        {
+            var attributes = contacts.SelectMany(x => x.ToAttributes()).ToArray();
+            return await SetAttributesAsync(attributes);
+        }
+
         public HttpResponseMessage SetAttributes(params ChurnZeroAttribute[] attributes) => SetAttributesAsync(attributes).GetAwaiter().GetResult();
 
-        /// <inheritdoc/>
         public async Task<HttpResponseMessage> SetAttributesAsync(params ChurnZeroAttribute[] attributes)
         {
-            var requests = attributes.Select(x=> new SetAttributeRequest(x, _appKey)).ToList();
+            var requests = attributes.Select(x => new SetAttributeRequest(x, _appKey)).ToList();
             var serialized = JsonConvert.SerializeObject(requests, Formatting.Indented, _jsonSerializerSettings);
             var requestContent =
                 new StringContent(serialized, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;
         }
-        /// <inheritdoc/>
         public HttpResponseMessage IncrementAttributes(params ChurnZeroAttribute[] attributes) => IncrementAttributesAsync(attributes).GetAwaiter().GetResult();
 
-        /// <inheritdoc/>
         public async Task<HttpResponseMessage> IncrementAttributesAsync(params ChurnZeroAttribute[] attributes)
         {
             var requests = attributes.Select(x => new IncrementAttributeRequest(x, _appKey)).ToList();
@@ -115,10 +156,8 @@ namespace ChurnZero.Sdk
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;
         }
-        /// <inheritdoc/>
         public HttpResponseMessage TrackEvents(params ChurnZeroEvent[] events) => TrackEventsAsync(events).GetAwaiter().GetResult();
 
-        /// <inheritdoc/>
         public async Task<HttpResponseMessage> TrackEventsAsync(params ChurnZeroEvent[] events)
         {
             var requests = events.Select(x=> new TrackEventRequest(x, _appKey)).ToList();
@@ -127,9 +166,7 @@ namespace ChurnZero.Sdk
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;
         }
-        /// <inheritdoc/>
         public HttpResponseMessage TrackTimeInApps(params ChurnZeroTimeInApp[] timeInApps) => TrackTimeInAppsAsync(timeInApps).GetAwaiter().GetResult();
-        /// <inheritdoc/>
         public async Task<HttpResponseMessage> TrackTimeInAppsAsync(params ChurnZeroTimeInApp[] timeInApps)
         {
             var requests = timeInApps.Select(x => new TimeInAppRequest(x, _appKey)).ToList();
@@ -138,5 +175,7 @@ namespace ChurnZero.Sdk
             var response = await _httpClient.PostAsync("i", requestContent);
             return response;
         }
+
+     
     }
 }

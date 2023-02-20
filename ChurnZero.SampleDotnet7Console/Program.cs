@@ -15,27 +15,32 @@ var client = new ChurnZeroHttpApiClient(new HttpClient() { BaseAddress = new Uri
 const string testAccountIdentifier = "Test Account ID";
 const string testContactIdentifier = "Test Contact ID";
 
-//Creates your customer's Account in Churn Zero or adjusts the name. CRM integration instead is recommended.
-var accountResponse = await client.SetAttributesAsync(
-    new ChurnZeroAttribute(testAccountIdentifier, StandardAccountFields.Name, "Test Customer Account"),
-    new ChurnZeroAttribute(testAccountIdentifier, StandardAccountFields.BillingAddressLine1, "123 Test Drive"),
-    new ChurnZeroAttribute(testAccountIdentifier, StandardAccountFields.BillingAddressLine2, "Suite 3"),
-    new ChurnZeroAttribute(testAccountIdentifier, StandardAccountFields.BillingAddressCity, "Testerville"),
-    new ChurnZeroAttribute(testAccountIdentifier, StandardAccountFields.BillingAddressState, "Test"),
-    new ChurnZeroAttribute(testAccountIdentifier, StandardAccountFields.StartDate, DateTime.Now)
+//Creates your customer's Account in Churn Zero or adjusts fields based on values supplied. CRM integration instead is recommended.
+var accountResponse = await client.UpdateAccountsAsync(
+    new ChurnZeroAccount()
+    {
+        AccountExternalId = testAccountIdentifier,
+        Name = "Test Customer Account",
+        BillingAddressLine1 = "321 Test Drive",
+        BillingAddressLine2 = "Suite 2",
+        BillingAddressCity = "Testerland",
+        BillingAddressState = "Test",
+        StartDate = DateTime.Now,
+        CustomFields = new Dictionary<string,string>() { {"Test Custom Field", "Test Custom Field Value 1" } }
+    }
 );
 Console.WriteLine($"Received {accountResponse.StatusCode} creating account");
 
-//Creates a custom field in Churn Zero.
-var testCustomFieldResponse = await client.SetAttributesAsync(new ChurnZeroAttribute("Test Custom Field", "Test Custom Field Value", EntityTypes.Account, testAccountIdentifier));
-Console.WriteLine($"Received {testCustomFieldResponse.StatusCode} updating Custom Field on account");
-
-//Creates your customer Account's Contact in Churn Zero. Must have an Account created first.
-var contactResponse = await client.SetAttributesAsync(
-    new ChurnZeroAttribute(testAccountIdentifier, testContactIdentifier, StandardContactFields.FirstName, "Joe"),
-    new ChurnZeroAttribute(testAccountIdentifier, testContactIdentifier, StandardContactFields.LastName, "Tester"),
-    new ChurnZeroAttribute("Test Custom Field Value 2", 0.ToString(), EntityTypes.Contact, testAccountIdentifier, testContactIdentifier )
-    );
+//Creates your customer Account's Contact in Churn Zero or adjusts fields based on values supplied. Must have an Account created first.
+var contactResponse = await client.UpdateContactsAsync(new ChurnZeroContact()
+{
+    AccountExternalId = testAccountIdentifier,
+    ContactExternalId = testContactIdentifier,
+    FirstName = "Sunny",
+    LastName = "Tester",
+    Email = "test@test.com",
+    CustomFields = new Dictionary<string, string>() {{"Test Custom Field Value 1", "0"}}
+});
 Console.WriteLine($"Received {contactResponse.StatusCode} creating contact");
 
 //Increments numeric attributes of accounts and contacts.
@@ -44,8 +49,6 @@ var incrementResponse = await client.IncrementAttributesAsync(
     new ChurnZeroAttribute("Test Custom Field Value 2", 5.ToString(), EntityTypes.Contact, testAccountIdentifier,
         testContactIdentifier));
 Console.WriteLine($"Received {incrementResponse.StatusCode} incrementing attributes");
-
-
 
 //Creates events for a specific customer Account and Contact.
 var eventResponse = await client.TrackEventsAsync(

@@ -11,6 +11,7 @@
         BillingAddressCity,
         BillingAddressState,
         BillingAddressZip,
+        BillingAddressCountry,
         StartDate,
         EndDate,
         LicenseCount,

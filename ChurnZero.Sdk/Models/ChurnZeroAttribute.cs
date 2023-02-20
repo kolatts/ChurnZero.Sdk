@@ -75,8 +75,8 @@ namespace ChurnZero.Sdk.Models
         /// <param name="field"></param>
         /// <param name="accountExternalId"></param>
         /// <param name="date"></param>
-        public ChurnZeroAttribute(string accountExternalId, StandardAccountFields field, DateTime date)
-            : this(accountExternalId, field, date.ToString("O")) { }
+        public ChurnZeroAttribute(string accountExternalId, StandardAccountFields field, DateTime? date)
+            : this(accountExternalId, field, date?.ToString("O")) { }
 
 
         [Required]
