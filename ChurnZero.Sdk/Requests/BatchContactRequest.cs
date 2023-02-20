@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -9,30 +7,21 @@ using ChurnZero.Sdk.Constants;
 using ChurnZero.Sdk.Models;
 using CsvHelper;
 using Newtonsoft.Json.Linq;
+// ReSharper disable ConvertToUsingDeclaration
 
 namespace ChurnZero.Sdk.Requests
 {
-    public class BatchContactRequest : IValidatableObject, IChurnZeroHttpRequest
+    public class BatchContactRequest :  IValidatableObject, IChurnZeroHttpRequest
     {
         public string AppKey { get; set; }
         public string Action => ChurnZeroActions.BatchContacts;
 
         public List<ChurnZeroContact> Contacts { get; set; }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            var customFields = Contacts.SelectMany(x => x.CustomFields.Keys).Distinct().ToList();
-            if (Contacts.Select(x => x.CustomFields)
-                .Any(x => !customFields.All(x.ContainsKey)))
-            {
-                yield return new ValidationResult("If custom fields are used, all contacts must contain them.");
-            }
-        }
-
+        
         public string ToCsvOutput()
         {
             Validator.ValidateObject(this, new ValidationContext(this));
-            //It is possible that the first account does not have all the attributes defined, so we are trying to find the one with the most defined.
+            //It is possible that the first account does not have all the attributes defined, so we are getting a distinct list of all attribute names.
             var allContactAttributes = Contacts.Select(x => x.ToAttributes(true)).ToList();
             var definedContactAttributes =
                 allContactAttributes
@@ -78,5 +67,11 @@ namespace ChurnZero.Sdk.Requests
         }
 
 
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!Contacts.Any())
+                yield return new ValidationResult("At least one contact must be supplied.");
+            Contacts.ForEach(x=> Validator.ValidateObject(x, new ValidationContext(x)));
+        }
     }
 }

@@ -25,7 +25,8 @@ Legend: ✅Supported ❌Not supported currently ⭕ Not applicable
 | HTTP | Time in App | ✅ | ⭕
 | HTTP/CSV | Batch Account Attributes | ✅ | ✅
 | HTTP/CSV | Batch Contact Attributes | ✅ | ✅
-| HTTP/CSV | Batch Events | ❌ |❌
+| HTTP/CSV | Batch Events | ✅ |✅
+| HTTP/CSV | Batch Custom Tables | ❌ | ❌
 | REST | Any | ❌ | ❌ |
 
 ## Supported Indirect Functionality
@@ -43,19 +44,17 @@ Without dependency injection (see [sample project](ChurnZero.SampleDotnet7Consol
 var client = new ChurnZeroHttpApiClient(new HttpClient() { BaseAddress = "https://mychurnzerourl.com/"}, "myAppKey"});
 ```
 
-With dependency injection:
+With dependency injection (see [sample project](ChurnZero.SampleDotnet7WebApi/Program.cs)):
 
 ```cs
-services.AddHttpClient("ChurnZeroApiClient", client =>
+using ChurnZero.Sdk
+
+//... the rest of your app setup
+// use .AddChurnZeroSdk on any IServiceCollection
+builder.Services.AddChurnZeroSdk((options) =>
 {
-    client.BaseAddress = new Uri("http://yourchurnzerourl");
-});
-services.AddScoped<IChurnZeroHttpApiClient, ChurnZeroHttpApiClient>(sp =>
-{
-    var httpClient = sp.GetRequiredService<IHttpClientFactory>()
-                        .CreateClient("ChurnZeroApiClient");
-    var appKey = configuration.GetValue<string>("ChurnZeroAppKey");
-    return new ChurnZeroHttpApiClient(httpClient, appKey);
+    options.Url = builder.Configuration["ChurnZeroUrl"]; //This is an example, it depends on how you get your configuration values
+    options.AppKey = builder.Configuration["ChurnZeroAppKey"]; //This is an example, it depends on how you get your configuration values
 });
 
 ```
@@ -189,6 +188,34 @@ var eventResponse = await client.TrackEventsAsync(
     );
 Console.WriteLine($"Received {eventResponse.StatusCode} tracking event");
 
+//Creates events like above, but in a batch/historical CSV upload.
+//A 200 response may be returned, but since the events are processed separately from the API request, an email notification will indicate the success/failure of the import.
+//Custom fields may need to be created in the Churn Zero Admin section prior to use.
+var batchEventResponse = await client.TrackEventsBatchAsync(new List<ChurnZeroBatchEvent>()
+{
+    new ChurnZeroBatchEvent()
+    {
+        AccountExternalId = testAccountIdentifier2,
+        ContactExternalId = testContactIdentifier2,
+        Description = "Test Description via Batch",
+        EventName = "Test Event Type 2",
+        EventDate = DateTime.Now,
+        Quantity = 500,
+    },
+    new ChurnZeroBatchEvent()
+    {
+        AccountExternalId = testAccountIdentifier2,
+        ContactExternalId = testContactIdentifier2,
+        Description = "Test Description via Batch",
+        EventName = "Test Event Type 2",
+        EventDate = DateTime.Now,
+        Quantity = 500,
+        CustomFields = new Dictionary<string, string>() { {"Test Custom Field Display Value", "1"}}
+    },
+}, "testBatchEvents");
+Console.WriteLine($"Received {batchEventResponse.StatusCode} for batch events");
+
+
 //Creates time in app tracking for a specific Account and Contact
 var timeInAppResponse = await client.TrackTimeInAppsAsync(
     new ChurnZeroTimeInApp(testAccountIdentifier, testContactIdentifier, DateTime.Now.AddHours(-1), DateTime.Now),
@@ -196,7 +223,6 @@ var timeInAppResponse = await client.TrackTimeInAppsAsync(
         "Test Module")
 );
 Console.WriteLine($"Received {timeInAppResponse.StatusCode} tracking time in app");
-
 
 ```
 

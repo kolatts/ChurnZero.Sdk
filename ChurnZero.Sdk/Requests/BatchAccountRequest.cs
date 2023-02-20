@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Web;
 using ChurnZero.Sdk.Constants;
 using ChurnZero.Sdk.Models;
 using CsvHelper;
@@ -14,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace ChurnZero.Sdk.Requests
 {
-    public class BatchAccountRequest :  IChurnZeroHttpRequest
+    public class BatchAccountRequest : IValidatableObject, IChurnZeroHttpRequest
     {
         public string AppKey { get; set; }
         public string Action => ChurnZeroActions.BatchAccounts;
@@ -68,5 +64,11 @@ namespace ChurnZero.Sdk.Requests
         }
 
 
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!Accounts.Any())
+                yield return new ValidationResult("At least one account must be supplied.");
+            Accounts.ForEach(x => Validator.ValidateObject(x, new ValidationContext(x)));
+        }
     }
 }
