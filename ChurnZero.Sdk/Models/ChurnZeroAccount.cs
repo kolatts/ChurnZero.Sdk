@@ -6,7 +6,12 @@ using ChurnZero.Sdk.Constants;
 
 namespace ChurnZero.Sdk.Models
 {
-    public class ChurnZeroAccount
+    public interface IChurnZeroAccount
+    {
+        string AccountExternalId { get; set; }
+    }
+
+    public class ChurnZeroAccount : IChurnZeroAccount
     {
         [Required]
         public string AccountExternalId { get; set; }
@@ -27,7 +32,7 @@ namespace ChurnZero.Sdk.Models
         public int? LicenseCount { get; set; }
         public string OwnerUserAccount { get; set; }
         public string ParentAccountExternalId { get; set; }
-        public Dictionary<string,string> CustomFields { get; set; } = new Dictionary<string,string>();
+        public Dictionary<string, string> CustomFields { get; set; } = new Dictionary<string, string>();
         internal IEnumerable<ChurnZeroAttribute> ToAttributes(bool prefixCustomFields = false)
         {
             return new List<ChurnZeroAttribute>()
@@ -46,7 +51,7 @@ namespace ChurnZero.Sdk.Models
                 new ChurnZeroAttribute(AccountExternalId, StandardAccountFields.LicenseCount, LicenseCount?.ToString()),
                 new ChurnZeroAttribute(AccountExternalId, StandardAccountFields.OwnerUserAccount, OwnerUserAccount),
                 new ChurnZeroAttribute(AccountExternalId, StandardAccountFields.ParentAccountExternalId, ParentAccountExternalId)
-            }.Union(CustomFields.Select(x=> new ChurnZeroAttribute(prefixCustomFields  ? ChurnZeroCustomField.FormatDisplayNameToCustomFieldName(x.Key) : x.Key, x.Value, EntityTypes.Account, AccountExternalId))).Where(x => !string.IsNullOrWhiteSpace(x.Value));
+            }.Union(CustomFields.Select(x => new ChurnZeroAttribute(prefixCustomFields ? ChurnZeroCustomField.FormatDisplayNameToCustomFieldName(x.Key) : x.Key, x.Value, EntityTypes.Account, AccountExternalId))).Where(x => !string.IsNullOrWhiteSpace(x.Value));
         }
     }
 }

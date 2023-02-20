@@ -5,6 +5,11 @@ using ChurnZero.Sdk.Constants;
 
 namespace ChurnZero.Sdk.Models
 {
+    public interface IChurnZeroContact
+    {
+        string AccountExternalId { get; set; }
+        string ContactExternalId { get; set; }
+    }
     public class ChurnZeroContact
     {
         [Required]
@@ -23,7 +28,7 @@ namespace ChurnZero.Sdk.Models
                     new ChurnZeroAttribute(AccountExternalId, ContactExternalId, StandardContactFields.LastName, LastName),
                     new ChurnZeroAttribute(AccountExternalId, ContactExternalId, StandardContactFields.Email, Email),
                 }
-                .Union(CustomFields.Select(x => new ChurnZeroAttribute(prefixCustomFields ? ChurnZeroCustomField.FormatDisplayNameToCustomFieldName(x.Key) :x.Key, x.Value, EntityTypes.Contact, AccountExternalId, ContactExternalId)))
+                .Union(CustomFields.Select(x => new ChurnZeroAttribute(prefixCustomFields ? ChurnZeroCustomField.FormatDisplayNameToCustomFieldName(x.Key) : x.Key, x.Value, EntityTypes.Contact, AccountExternalId, ContactExternalId)))
                 .Where(x => !string.IsNullOrWhiteSpace(x.Value));
         }
     }

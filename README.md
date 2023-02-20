@@ -1,4 +1,4 @@
-﻿# Churn Zero SDK
+﻿# ChurnZero SDK
 This library is __not officially supported by [ChurnZero](https://www.churnzero.com/)__. 
 Licensed under the [Apache 2.0 License](https://github.com/kolatts/ChurnZero.Sdk/blob/main/LICENSE) (free for commercial and personal use). Contributions are welcome via pull request.
 

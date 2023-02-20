@@ -1,6 +1,7 @@
 ﻿using ChurnZero.SampleDotnet7Console;
 using ChurnZero.Sdk;
 using ChurnZero.Sdk.Constants;
+using ChurnZero.Sdk.Decorators;
 using ChurnZero.Sdk.Models;
 using Microsoft.Extensions.Configuration;
 // ReSharper disable ArrangeObjectCreationWhenTypeEvident
@@ -173,3 +174,22 @@ var timeInAppResponse = await client.TrackTimeInAppsAsync(
         "Test Module")
 );
 Console.WriteLine($"Received {timeInAppResponse.StatusCode} tracking time in app");
+
+
+//C# Decorator Usage
+var customModels = new List<CustomChurnZeroAccountModel>()
+{
+    new CustomChurnZeroAccountModel() {AccountExternalId = testAccountIdentifier, CustomProperty = 99},
+    new CustomChurnZeroAccountModel() {AccountExternalId = testAccountIdentifier2, CustomProperty = 999},
+};
+var batchUploadResponse = await client.UpdateAccountsBatchAsync(customModels.ToChurnZeroAccounts(), "testDecoratorImport");
+Console.WriteLine($"Received {batchUploadResponse.StatusCode} for batch upload of custom account model");
+
+//C# Decorator Support - ChurnZero Account Attributes for Custom Fields
+public class CustomChurnZeroAccountModel : IChurnZeroAccount
+{
+    public string AccountExternalId { get; set; } = string.Empty;
+
+    [ChurnZeroAccountAttribute("Test Custom Field 3")]
+    public int CustomProperty { get; set; }
+}
