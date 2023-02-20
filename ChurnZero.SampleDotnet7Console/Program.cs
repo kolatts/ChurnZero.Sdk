@@ -9,8 +9,8 @@ using Microsoft.Extensions.Configuration;
 
 var builder = new ConfigurationBuilder().AddUserSecrets<Program>();
 var config = builder.Build();
-SetupException.ThrowIfNull("Churn Zero URL", config["ChurnZeroUrl"]);
-SetupException.ThrowIfNull("Churn Zero App Key", config["ChurnZeroAppKey"]);
+SetupException.ThrowIfNull("ChurnZero URL", config["ChurnZeroUrl"]);
+SetupException.ThrowIfNull("ChurnZero App Key", config["ChurnZeroAppKey"]);
 
 var client = new ChurnZeroHttpApiClient(new HttpClient() { BaseAddress = new Uri(config["ChurnZeroUrl"]!) }, config["ChurnZeroAppKey"]);
 
@@ -20,7 +20,7 @@ const string testAccountIdentifier2 = "Test Account ID 2";
 const string testContactIdentifier = "Test Contact ID";
 const string testContactIdentifier2 = "Test Contact ID 2";
 
-//Creates your customer's Account in Churn Zero or adjusts fields based on values supplied. CRM integration instead is recommended.
+//Creates your customer's Account in ChurnZero or adjusts fields based on values supplied. CRM integration instead is recommended.
 var accountResponse = await client.UpdateAccountsAsync(
     new ChurnZeroAccount()
     {
@@ -36,7 +36,7 @@ var accountResponse = await client.UpdateAccountsAsync(
 );
 Console.WriteLine($"Received {accountResponse.StatusCode} creating account");
 
-//Performs the same add/update for Accounts in Churn Zero but scales much larger (500 MB file size).
+//Performs the same add/update for Accounts in ChurnZero but scales much larger (500 MB file size).
 //A 200 response may be returned, but since the accounts are processed separately from the API request, an email notification will indicate the success/failure of the import.
 //Custom fields need to be added via non-batch methods first.
 var accountBatchResponse = await client.UpdateAccountsBatchAsync(
@@ -68,7 +68,7 @@ var accountBatchResponse = await client.UpdateAccountsBatchAsync(
 Console.WriteLine($"Received {accountBatchResponse.StatusCode} account batch add/update");
 
 
-//Creates your customer Account's Contact in Churn Zero or adjusts fields based on values supplied. Must have an Account created first.
+//Creates your customer Account's Contact in ChurnZero or adjusts fields based on values supplied. Must have an Account created first.
 var contactResponse = await client.UpdateContactsAsync(new ChurnZeroContact()
 {
     AccountExternalId = testAccountIdentifier,
@@ -81,7 +81,7 @@ var contactResponse = await client.UpdateContactsAsync(new ChurnZeroContact()
 Console.WriteLine($"Received {contactResponse.StatusCode} creating contact");
 
 
-//Performs the same add/update for Accounts in Churn Zero but scales much larger (500 MB file size).
+//Performs the same add/update for Contacts in ChurnZero but scales much larger (500 MB file size).
 //A 200 response may be returned, but since the contacts are processed separately from the API request, an email notification will indicate the success/failure of the import.
 //Custom fields need to be added via non-batch methods first.
 var contactBatchResponse = await client.UpdateContactsBatchAsync(new List<ChurnZeroContact>()
@@ -121,7 +121,7 @@ var eventResponse = await client.TrackEventsAsync(
         AccountExternalId = testAccountIdentifier, //Required
         ContactExternalId = testContactIdentifier, //Required
         Description = "Test Description", //Optional, can vary with event and is visible when viewing the individual events.
-        EventName = "Test Event Type", //Required, this becomes the display name of the event in Churn Zero.
+        EventName = "Test Event Type", //Required, this becomes the display name of the event in ChurnZero.
         EventDate = DateTime.Now, //Optional
         Quantity = 5, //Optional
 
@@ -140,7 +140,7 @@ Console.WriteLine($"Received {eventResponse.StatusCode} tracking event");
 
 //Creates events like above, but in a batch/historical CSV upload.
 //A 200 response may be returned, but since the events are processed separately from the API request, an email notification will indicate the success/failure of the import.
-//Custom fields may need to be created in the Churn Zero Admin section prior to use.
+//Custom fields may need to be created in the ChurnZero Admin section prior to use.
 var batchEventResponse = await client.TrackEventsBatchAsync(new List<ChurnZeroBatchEvent>()
 {
     new ChurnZeroBatchEvent()

@@ -1,12 +1,13 @@
 ﻿# Churn Zero SDK
+This library is __not officially supported by [ChurnZero](https://www.churnzero.com/)__. 
+Licensed under the [Apache 2.0 License](https://github.com/kolatts/ChurnZero.Sdk/blob/main/LICENSE) (free for commercial and personal use). Contributions are welcome via pull request.
 
-This library is __not officially supported by [Churn Zero](https://www.churnzero.com/)__. 
-
-Licensed under the [Apache 2.0 License](LICENSE) (free for commercial and personal use). Contributions are welcome via pull request.
-
+[![NuGet version (ChurnZero.Sdk)](https://img.shields.io/nuget/v/ChurnZero.Sdk.svg?style=flat-square)](https://www.nuget.org/packages/ChurnZero.Sdk/)
+[![NuGet downloads (ChurnZero.Sdk)](https://img.shields.io/nuget/dt/ChurnZero.Sdk.svg?style=flat-square)](https://www.nuget.org/packages/ChurnZero.Sdk/)
+[![Commits (ChurnZero.Sdk)](https://img.shields.io/github/commit-activity/m/kolatts/ChurnZero.Sdk)](https://github.com/kolatts/ChurnZero.Sdk/)
 
 ## Purpose
-The purpose of this library is to create an easy-to-use means for .NET developers to incorporate Churn Zero into applications.
+The purpose of this library is to create an easy-to-use means for .NET developers to incorporate ChurnZero into applications.
 
 *Note that until 1.x is formally released, all implementation is subject to change. Use at your own risk of refactoring.*
 
@@ -39,12 +40,12 @@ Legend: ✅Supported ❌Not supported currently ⭕ Not applicable
 
 ## Getting Started - Setup
 
-Without dependency injection (see [sample project](ChurnZero.SampleDotnet7Console/Program.cs)):
+Without dependency injection (see [sample project](https://github.com/kolatts/ChurnZero.Sdk/blob/main/ChurnZero.SampleDotnet7Console/Program.cs)):
 ```cs
 var client = new ChurnZeroHttpApiClient(new HttpClient() { BaseAddress = "https://mychurnzerourl.com/"}, "myAppKey"});
 ```
 
-With dependency injection (see [sample project](ChurnZero.SampleDotnet7WebApi/Program.cs)):
+With dependency injection (see [sample project](https://github.com/kolatts/ChurnZero.Sdk/blob/main/ChurnZero.SampleDotnet7WebApi/Program.cs)):
 
 ```cs
 using ChurnZero.Sdk
@@ -70,7 +71,7 @@ const string testAccountIdentifier2 = "Test Account ID 2";
 const string testContactIdentifier = "Test Contact ID";
 const string testContactIdentifier2 = "Test Contact ID 2";
 
-//Creates your customer's Account in Churn Zero or adjusts fields based on values supplied. CRM integration instead is recommended.
+//Creates your customer's Account in ChurnZero or adjusts fields based on values supplied. CRM integration instead is recommended.
 var accountResponse = await client.UpdateAccountsAsync(
     new ChurnZeroAccount()
     {
@@ -86,7 +87,7 @@ var accountResponse = await client.UpdateAccountsAsync(
 );
 Console.WriteLine($"Received {accountResponse.StatusCode} creating account");
 
-//Performs the same add/update for Accounts in Churn Zero but scales much larger (500 MB file size).
+//Performs the same add/update for Accounts in ChurnZero but scales much larger (500 MB file size).
 //A 200 response may be returned, but since the accounts are processed separately from the API request, an email notification will indicate the success/failure of the import.
 //Custom fields need to be added via non-batch methods first.
 var accountBatchResponse = await client.UpdateAccountsBatchAsync(
@@ -118,7 +119,7 @@ var accountBatchResponse = await client.UpdateAccountsBatchAsync(
 Console.WriteLine($"Received {accountBatchResponse.StatusCode} account batch add/update");
 
 
-//Creates your customer Account's Contact in Churn Zero or adjusts fields based on values supplied. Must have an Account created first.
+//Creates your customer Account's Contact in ChurnZero or adjusts fields based on values supplied. Must have an Account created first.
 var contactResponse = await client.UpdateContactsAsync(new ChurnZeroContact()
 {
     AccountExternalId = testAccountIdentifier,
@@ -131,7 +132,7 @@ var contactResponse = await client.UpdateContactsAsync(new ChurnZeroContact()
 Console.WriteLine($"Received {contactResponse.StatusCode} creating contact");
 
 
-//Performs the same add/update for Accounts in Churn Zero but scales much larger (500 MB file size).
+//Performs the same add/update for Contacts in ChurnZero but scales much larger (500 MB file size).
 //A 200 response may be returned, but since the contacts are processed separately from the API request, an email notification will indicate the success/failure of the import.
 //Custom fields need to be added via non-batch methods first.
 var contactBatchResponse = await client.UpdateContactsBatchAsync(new List<ChurnZeroContact>()
@@ -171,7 +172,7 @@ var eventResponse = await client.TrackEventsAsync(
         AccountExternalId = testAccountIdentifier, //Required
         ContactExternalId = testContactIdentifier, //Required
         Description = "Test Description", //Optional, can vary with event and is visible when viewing the individual events.
-        EventName = "Test Event Type", //Required, this becomes the display name of the event in Churn Zero.
+        EventName = "Test Event Type", //Required, this becomes the display name of the event in ChurnZero.
         EventDate = DateTime.Now, //Optional
         Quantity = 5, //Optional
 
@@ -190,7 +191,7 @@ Console.WriteLine($"Received {eventResponse.StatusCode} tracking event");
 
 //Creates events like above, but in a batch/historical CSV upload.
 //A 200 response may be returned, but since the events are processed separately from the API request, an email notification will indicate the success/failure of the import.
-//Custom fields may need to be created in the Churn Zero Admin section prior to use.
+//Custom fields may need to be created in the ChurnZero Admin section prior to use.
 var batchEventResponse = await client.TrackEventsBatchAsync(new List<ChurnZeroBatchEvent>()
 {
     new ChurnZeroBatchEvent()
@@ -224,8 +225,10 @@ var timeInAppResponse = await client.TrackTimeInAppsAsync(
 );
 Console.WriteLine($"Received {timeInAppResponse.StatusCode} tracking time in app");
 
+
 ```
 
 ## Running the sample project locally
 
-See [README.md](ChurnZero.SampleDotnet7Console/README.md) in sample project. 
+See [README.md](https://github.com/kolatts/ChurnZero.Sdk/blob/main/ChurnZero.SampleDotnet7Console/README.md) in sample Console project.
+For dependency injection, see [README.md](https://github.com/kolatts/ChurnZero.Sdk/blob/main/ChurnZero.SampleDotnet7WebApi/README.md) in Web API sample.
