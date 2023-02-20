@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using ChurnZero.Sdk.Constants;
 using ChurnZero.Sdk.Models;
-using Newtonsoft.Json;
 
 namespace ChurnZero.Sdk.Requests
 {

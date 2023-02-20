@@ -2,7 +2,6 @@
 using System.Net.Http;
 using ChurnZero.Sdk.Options;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ChurnZero.Sdk
 {
