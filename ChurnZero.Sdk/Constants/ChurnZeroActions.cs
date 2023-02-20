@@ -8,5 +8,6 @@
         public const string TimeInApp = "trackTimeInApp";
         public const string BatchAccounts = "batchAccountsCsv";
         public const string BatchContacts = "batchContactsCsv";
+        public const string BatchEvents = "batchEventsCsv";
     }
 }

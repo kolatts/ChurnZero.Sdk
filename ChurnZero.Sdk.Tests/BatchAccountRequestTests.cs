@@ -45,6 +45,46 @@ namespace ChurnZero.Sdk.Tests
             Assert.AreEqual(request.Accounts[0].BillingAddressCity, results[0].BillingAddressCity);
             Assert.AreEqual(request.Accounts[0].CustomFields["Test Account Custom Field 1"], results[0].CustomFields[ChurnZeroCustomField.FormatDisplayNameToCustomFieldName("Test Account Custom Field 1")]);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(System.ComponentModel.DataAnnotations.ValidationException))]
+        public void ToCsvOutput_ValidatesRequiredFields()
+        {
+            var request = new BatchAccountRequest()
+            {
+                Accounts = new List<ChurnZeroAccount>()
+                {
+                    new()
+                    {
+                        AccountExternalId = Guid.NewGuid().ToString(),
+                        IsActive = false,
+                        BillingAddressCity = "Test1",
+                        CustomFields = new Dictionary<string, string>() {{"Test Account Custom Field 1", "1"}}
+                    },
+                    new()
+                    {
+                        IsActive = true,
+                        BillingAddressCity = "Test2",
+                    },
+                },
+                AppKey = "test",
+            };
+
+            request.ToCsvOutput();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(System.ComponentModel.DataAnnotations.ValidationException))]
+        public void ToCsvOutput_Validates_ItemsIncluded()
+        {
+            var request = new BatchAccountRequest()
+            {
+                Accounts = new List<ChurnZeroAccount>(),
+                AppKey = "test",
+            };
+            request.ToCsvOutput();
+        }
+
         private static List<ChurnZeroAccount> GetChurnZeroAccounts(string csvInput)
         {
             using var reader = new StringReader(csvInput);

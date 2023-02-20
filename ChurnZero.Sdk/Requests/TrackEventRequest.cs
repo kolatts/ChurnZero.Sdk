@@ -2,6 +2,8 @@
 using ChurnZero.Sdk.Models;
 using System.ComponentModel.DataAnnotations;
 using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace ChurnZero.Sdk.Requests
 {
@@ -18,6 +20,7 @@ namespace ChurnZero.Sdk.Requests
             EventName = e.EventName;
             Quantity = e.Quantity;
             AllowDupes = e.AllowDupes;
+            //CustomFields = e.CustomFields; //Custom fields on events do not seem to be supported yet via HTTP API creation, only batch upload.
         }
         public string AppKey { get; set; }
         public string Action => ChurnZeroActions.TrackEvent;
@@ -34,6 +37,6 @@ namespace ChurnZero.Sdk.Requests
         public int? Quantity { get; set; }
         public bool AllowDupes { get; set; }
         //[JsonIgnore]
-        //public override Dictionary<string, string> CustomFields { get; set; }
+        //public  Dictionary<string, string> CustomFields { get; set; }
     }
 }

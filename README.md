@@ -25,7 +25,8 @@ Legend: ✅Supported ❌Not supported currently ⭕ Not applicable
 | HTTP | Time in App | ✅ | ⭕
 | HTTP/CSV | Batch Account Attributes | ✅ | ✅
 | HTTP/CSV | Batch Contact Attributes | ✅ | ✅
-| HTTP/CSV | Batch Events | ❌ |❌
+| HTTP/CSV | Batch Events | ✅ |✅
+| HTTP/CSV | Batch Custom Tables | ❌ | ❌
 | REST | Any | ❌ | ❌ |
 
 ## Supported Indirect Functionality
@@ -187,6 +188,34 @@ var eventResponse = await client.TrackEventsAsync(
     );
 Console.WriteLine($"Received {eventResponse.StatusCode} tracking event");
 
+//Creates events like above, but in a batch/historical CSV upload.
+//A 200 response may be returned, but since the events are processed separately from the API request, an email notification will indicate the success/failure of the import.
+//Custom fields may need to be created in the Churn Zero Admin section prior to use.
+var batchEventResponse = await client.TrackEventsBatchAsync(new List<ChurnZeroBatchEvent>()
+{
+    new ChurnZeroBatchEvent()
+    {
+        AccountExternalId = testAccountIdentifier2,
+        ContactExternalId = testContactIdentifier2,
+        Description = "Test Description via Batch",
+        EventName = "Test Event Type 2",
+        EventDate = DateTime.Now,
+        Quantity = 500,
+    },
+    new ChurnZeroBatchEvent()
+    {
+        AccountExternalId = testAccountIdentifier2,
+        ContactExternalId = testContactIdentifier2,
+        Description = "Test Description via Batch",
+        EventName = "Test Event Type 2",
+        EventDate = DateTime.Now,
+        Quantity = 500,
+        CustomFields = new Dictionary<string, string>() { {"Test Custom Field Display Value", "1"}}
+    },
+}, "testBatchEvents");
+Console.WriteLine($"Received {batchEventResponse.StatusCode} for batch events");
+
+
 //Creates time in app tracking for a specific Account and Contact
 var timeInAppResponse = await client.TrackTimeInAppsAsync(
     new ChurnZeroTimeInApp(testAccountIdentifier, testContactIdentifier, DateTime.Now.AddHours(-1), DateTime.Now),
@@ -194,7 +223,6 @@ var timeInAppResponse = await client.TrackTimeInAppsAsync(
         "Test Module")
 );
 Console.WriteLine($"Received {timeInAppResponse.StatusCode} tracking time in app");
-
 
 ```
 

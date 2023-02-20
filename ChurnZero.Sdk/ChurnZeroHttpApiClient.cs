@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -7,9 +8,11 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using ChurnZero.Sdk.Constants;
 using ChurnZero.Sdk.Models;
 using ChurnZero.Sdk.Requests;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace ChurnZero.Sdk
@@ -129,8 +132,31 @@ namespace ChurnZero.Sdk
         /// <returns></returns>
         Task<HttpResponseMessage> UpdateContactsBatchAsync(IEnumerable<ChurnZeroContact> contacts, string nameOfImport,
             string emailNotification = null);
+
+        /// <summary>
+        /// Uses the batch upload CSV to add batch/historical events synchronously. Custom fields <i>must</i> be created in advance.
+        /// </summary>
+        /// <param name="events"></param>
+        /// <param name="nameOfImport"></param>
+        /// <param name="emailNotification"></param>
+        /// <param name="allowDupes"></param>
+        /// <returns></returns>
+        HttpResponseMessage TrackEventsBatch(IEnumerable<ChurnZeroBatchEvent> events, string nameOfImport,
+            string emailNotification = null, bool allowDupes = false);
+        /// <summary>
+        /// Uses the batch upload CSV to add batch/historical events asynchronously. Custom fields <i>must</i> be created in advance.
+        /// </summary>
+        /// <param name="events"></param>
+        /// <param name="nameOfImport"></param>
+        /// <param name="emailNotification"></param>
+        /// <param name="allowDupes"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> TrackEventsBatchAsync(IEnumerable<ChurnZeroBatchEvent> events, string nameOfImport,
+            string emailNotification = null, bool allowDupes = false);
+
     }
     /// <inheritdoc cref="IChurnZeroHttpApiClient"/>
+    [SuppressMessage("ReSharper", "ConvertToUsingDeclaration")] //No neat using statements, thanks .NET standard 2.0!
     public class ChurnZeroHttpApiClient : IChurnZeroHttpApiClient
     {
         private readonly HttpClient _httpClient;
@@ -223,10 +249,8 @@ namespace ChurnZero.Sdk
                 Accounts = accounts.ToList(),
                 AppKey = _appKey,
             };
-            var csvOutput = request.ToCsvOutput();
             HttpResponseMessage response;
-
-            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(csvOutput)))
+            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(request.ToCsvOutput())))
             {
                 using (var fileContent = new StreamContent(memoryStream))
                 {
@@ -255,10 +279,8 @@ namespace ChurnZero.Sdk
                 Contacts = contacts.ToList(),
                 AppKey = _appKey,
             };
-            var csvOutput = request.ToCsvOutput();
             HttpResponseMessage response;
-
-            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(csvOutput)))
+            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(request.ToCsvOutput())))
             {
                 using (var fileContent = new StreamContent(memoryStream))
                 {
@@ -270,6 +292,40 @@ namespace ChurnZero.Sdk
                             ? $"&email={HttpUtility.UrlEncode(emailNotification)}"
                             : string.Empty;
                         response = await _httpClient.PostAsync($"{request.Action}?appKey={_appKey}{emailQueryAddition}", formContent);
+                    }
+                }
+            }
+            return response;
+        }
+
+        public HttpResponseMessage TrackEventsBatch(IEnumerable<ChurnZeroBatchEvent> events, string nameOfImport,
+            string emailNotification = null,
+            bool allowDupes = false) => TrackEventsBatchAsync(events, nameOfImport, emailNotification, allowDupes)
+            .GetAwaiter().GetResult();
+
+        public async Task<HttpResponseMessage> TrackEventsBatchAsync(IEnumerable<ChurnZeroBatchEvent> events, string nameOfImport, string emailNotification = null,
+            bool allowDupes = false)
+        {
+            var request = new BatchEventRequest()
+            {
+                Events = events.ToList(),
+                AppKey = _appKey
+            };
+            HttpResponseMessage response;
+            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(request.ToCsvOutput())))
+            {
+                using (var fileContent = new StreamContent(memoryStream))
+                {
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+                    using (var formContent = new MultipartFormDataContent())
+                    {
+                        formContent.Add(fileContent, "data", $"{nameOfImport}.csv");
+                        var emailQueryAddition = string.IsNullOrWhiteSpace(emailNotification)
+                            ? $"&email={HttpUtility.UrlEncode(emailNotification)}"
+                            : string.Empty;
+                        var allowDupesAddition = allowDupes ? "&allowDupes=true" : string.Empty;
+
+                        response = await _httpClient.PostAsync($"{request.Action}?appKey={_appKey}{emailQueryAddition}{allowDupesAddition}", formContent);
                     }
                 }
             }
