@@ -43,19 +43,17 @@ Without dependency injection (see [sample project](ChurnZero.SampleDotnet7Consol
 var client = new ChurnZeroHttpApiClient(new HttpClient() { BaseAddress = "https://mychurnzerourl.com/"}, "myAppKey"});
 ```
 
-With dependency injection:
+With dependency injection (see [sample project](ChurnZero.SampleDotnet7WebApi/Program.cs)):
 
 ```cs
-services.AddHttpClient("ChurnZeroApiClient", client =>
+using ChurnZero.Sdk
+
+//... the rest of your app setup
+// use .AddChurnZeroSdk on any IServiceCollection
+builder.Services.AddChurnZeroSdk((options) =>
 {
-    client.BaseAddress = new Uri("http://yourchurnzerourl");
-});
-services.AddScoped<IChurnZeroHttpApiClient, ChurnZeroHttpApiClient>(sp =>
-{
-    var httpClient = sp.GetRequiredService<IHttpClientFactory>()
-                        .CreateClient("ChurnZeroApiClient");
-    var appKey = configuration.GetValue<string>("ChurnZeroAppKey");
-    return new ChurnZeroHttpApiClient(httpClient, appKey);
+    options.Url = builder.Configuration["ChurnZeroUrl"]; //This is an example, it depends on how you get your configuration values
+    options.AppKey = builder.Configuration["ChurnZeroAppKey"]; //This is an example, it depends on how you get your configuration values
 });
 
 ```
