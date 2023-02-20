@@ -9,6 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChurnZero.SampleDotnet7Cons
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Actions", "{5B061DE6-BDE4-40D4-8AC1-13E8EF4FA214}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-only.yml = .github\workflows\build-only.yml
 		.github\workflows\nuget-publish.yml = .github\workflows\nuget-publish.yml
 	EndProjectSection
 EndProject
