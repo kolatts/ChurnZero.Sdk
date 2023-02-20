@@ -125,10 +125,10 @@ namespace ChurnZero.Sdk
         /// Uses the batch upload CSV to update accounts in batch asynchronously. Custom fields <i>must</i> be created via <see cref="UpdateContactsAsync"/> or <see cref="SetAttributesAsync"/> prior to use in batch.
         /// </summary>
         /// <param name="contacts">The contacts to update</param>
-        /// <param name="fileName">The filename(as referenced in the email, if applicable)</param>
+        /// <param name="nameOfImport">The filename(as referenced in the email, if applicable)</param>
         /// <param name="emailNotification">The email to be notified upon completion</param>
         /// <returns></returns>
-        Task<HttpResponseMessage> UpdateContactsBatchAsync(IEnumerable<ChurnZeroContact> contacts, string fileName,
+        Task<HttpResponseMessage> UpdateContactsBatchAsync(IEnumerable<ChurnZeroContact> contacts, string nameOfImport,
             string emailNotification = null);
     }
     /// <inheritdoc cref="IChurnZeroHttpApiClient"/>
@@ -249,9 +249,32 @@ namespace ChurnZero.Sdk
             string emailNotification = null) => UpdateContactsBatchAsync(contacts, nameOfImport, emailNotification)
             .GetAwaiter().GetResult();
 
-        public Task<HttpResponseMessage> UpdateContactsBatchAsync(IEnumerable<ChurnZeroContact> contacts, string fileName, string emailNotification = null)
+        public async Task<HttpResponseMessage> UpdateContactsBatchAsync(IEnumerable<ChurnZeroContact> contacts, string nameOfImport, string emailNotification = null)
         {
-            throw new NotImplementedException();
+            var request = new BatchContactRequest()
+            {
+                Contacts = contacts.ToList(),
+                AppKey = _appKey,
+            };
+            var csvOutput = request.ToCsvOutput();
+            HttpResponseMessage response;
+
+            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(csvOutput)))
+            {
+                using (var fileContent = new StreamContent(memoryStream))
+                {
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+                    using (var formContent = new MultipartFormDataContent())
+                    {
+                        formContent.Add(fileContent, "data", $"{nameOfImport}.csv");
+                        var emailQueryAddition = string.IsNullOrWhiteSpace(emailNotification)
+                            ? $"&email={HttpUtility.UrlEncode(emailNotification)}"
+                            : string.Empty;
+                        response = await _httpClient.PostAsync($"{request.Action}?appKey={_appKey}{emailQueryAddition}", formContent);
+                    }
+                }
+            }
+            return response;
         }
     }
 }

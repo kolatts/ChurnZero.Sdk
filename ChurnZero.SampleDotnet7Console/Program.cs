@@ -60,9 +60,9 @@ var accountBatchResponse = await client.UpdateAccountsBatchAsync(
         StartDate = DateTime.Now,
         CustomFields = new Dictionary<string, string>() { { "Test Custom Field", "Test Custom Field Value 2" } }
     },
-    }, "testImport"
+    }, "testAccountImport"
 );
-Console.WriteLine($"Received {accountBatchResponse.StatusCode} account batch update");
+Console.WriteLine($"Received {accountBatchResponse.StatusCode} account batch add/update");
 
 
 //Creates your customer Account's Contact in Churn Zero or adjusts fields based on values supplied. Must have an Account created first.
@@ -76,6 +76,33 @@ var contactResponse = await client.UpdateContactsAsync(new ChurnZeroContact()
     CustomFields = new Dictionary<string, string>() {{"Test Custom Field Value 1", "0"}}
 });
 Console.WriteLine($"Received {contactResponse.StatusCode} creating contact");
+
+
+//Performs the same add/update for Accounts in Churn Zero but scales much larger (500 MB file size).
+//A 200 response may be returned, but since the contacts are processed separately from the API request, an email notification will indicate the success/failure of the import.
+//Custom fields need to be added via non-batch methods first.
+var contactBatchResponse = await client.UpdateContactsBatchAsync(new List<ChurnZeroContact>()
+{
+    new ChurnZeroContact()
+    {
+        AccountExternalId = testAccountIdentifier,
+        ContactExternalId = testContactIdentifier,
+        FirstName = "Sunny",
+        LastName = "Tester",
+        Email = "test@test.com",
+        CustomFields = new Dictionary<string, string>() {{"Test Custom Field Value 1", "0"}}
+    },
+    new ChurnZeroContact()
+    {
+        AccountExternalId = testAccountIdentifier2,
+        ContactExternalId = testContactIdentifier2,
+        FirstName = "Joe",
+        LastName = "Tester",
+        Email = "test@test.com",
+        CustomFields = new Dictionary<string, string>() {{"Test Custom Field Value 1", "2"}}
+    }
+}, "testContactImport");
+Console.WriteLine($"Received {contactBatchResponse.StatusCode} contact batch add/update");
 
 //Increments numeric attributes of accounts and contacts.
 var incrementResponse = await client.IncrementAttributesAsync(

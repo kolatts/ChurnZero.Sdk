@@ -14,43 +14,24 @@ using Newtonsoft.Json.Linq;
 
 namespace ChurnZero.Sdk.Requests
 {
-    public class BatchAccountRequest : IValidatableObject, IChurnZeroHttpRequest
+    public class BatchAccountRequest :  IChurnZeroHttpRequest
     {
         public string AppKey { get; set; }
         public string Action => ChurnZeroActions.BatchAccounts;
 
         public List<ChurnZeroAccount> Accounts { get; set; }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            var customFields = Accounts.SelectMany(x => x.CustomFields.Keys).Distinct().ToList();
-            if (Accounts.Select(x => x.CustomFields)
-                .Any(x => !customFields.All(x.ContainsKey)))
-            {
-                yield return new ValidationResult("If custom fields are used, all accounts must contain them.");
-            }
-        }
-
-        public string GetUrl(string notificationEmail = null)
-        {
-            var queryString = HttpUtility.ParseQueryString($"appKey={AppKey}");
-            if (!string.IsNullOrWhiteSpace(notificationEmail))
-            {
-                queryString.Add("email", notificationEmail);
-            }
-            return $"{Action}?{queryString}";
-        }
 
         public string ToCsvOutput()
         {
             Validator.ValidateObject(this, new ValidationContext(this));
-            //It is possible that the first account does not have all the attributes defined, so we are trying to find the one with the most defined.
             var allAccountAttributes = Accounts.Select(x => x.ToAttributes(true)).ToList();
             var definedAccountAttributes =
                 allAccountAttributes
-                .OrderByDescending(x => x.Count())
-                .First()
-                .ToList();
+                    .SelectMany(x => x)
+                    .Select(x => x.Name)
+                    .Distinct()
+                    .ToList();
             string output;
             using (var writer = new StringWriter())
             {
@@ -58,24 +39,24 @@ namespace ChurnZero.Sdk.Requests
                 {
                     var headerObject = new JObject()
                     {
-                        {"accountExternalId", definedAccountAttributes.First().AccountExternalId}
+                        {"accountExternalId", string.Empty}
                     };
                     foreach (var attribute in definedAccountAttributes)
                     {
-                        headerObject.Add(attribute.Name, attribute.Value);
+                        headerObject.Add(attribute, string.Empty);
                     }
                     csv.WriteDynamicHeader(headerObject);
                     csv.NextRecord();
-                    foreach (var account in Accounts)
+                    foreach (var account in Accounts.Select(x => x.AccountExternalId))
                     {
                         var accountAttributes = allAccountAttributes
                             .First(x =>
-                                x.Any(y => y.AccountExternalId == account.AccountExternalId))
+                                x.Any(y => y.AccountExternalId == account))
                             .ToDictionary(x => x.Name);
-                        csv.WriteField(account.AccountExternalId);
-                        foreach (var attributeName in definedAccountAttributes.Select(x => x.Name))
+                        csv.WriteField(account);
+                        foreach (var attributeName in definedAccountAttributes)
                         {
-                            csv.WriteField(accountAttributes[attributeName].Value);
+                            csv.WriteField(accountAttributes.ContainsKey(attributeName) ? accountAttributes[attributeName].Value : string.Empty);
                         }
                         csv.NextRecord();
                     }

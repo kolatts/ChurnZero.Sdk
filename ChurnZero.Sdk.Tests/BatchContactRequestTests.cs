@@ -8,27 +8,27 @@ using CsvHelper.Configuration;
 namespace ChurnZero.Sdk.Tests
 {
     [TestClass]
-    public class BatchAccountRequestTests
+    public class BatchContactRequestTests
     {
         [TestMethod]
         public void ToCsvOutput_Succeeds()
         {
-            var request = new BatchAccountRequest()
+            var request = new BatchContactRequest()
             {
-                Accounts = new List<ChurnZeroAccount>()
+                Contacts = new List<ChurnZeroContact>()
                 {
                     new()
                     {
                         AccountExternalId = Guid.NewGuid().ToString(),
-                        IsActive = false,
-                        BillingAddressCity = "Test1",
+                        FirstName = "Sunny",
+                        LastName = "Tester",
                         CustomFields = new Dictionary<string, string>() {{"Test Account Custom Field 1", "1"}}
                     },
                     new()
                     {
                         AccountExternalId = Guid.NewGuid().ToString(),
-                        IsActive = true,
-                        BillingAddressCity = "Test2",
+                        FirstName = "Joe",
+                        Email = "Tester",
                         CustomFields = new Dictionary<string, string>() {{"Test Account Custom Field 1", "2"}}
                     },
                 },
@@ -38,27 +38,30 @@ namespace ChurnZero.Sdk.Tests
             var output = request.ToCsvOutput();
 
             Assert.IsNotNull(output);
-            var results = GetChurnZeroAccounts(output);
+            var results = GetChurnZeroContacts(output);
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(request.Accounts[0].AccountExternalId, results[0].AccountExternalId);
-            Assert.AreEqual(request.Accounts[0].IsActive, results[0].IsActive);
-            Assert.AreEqual(request.Accounts[0].BillingAddressCity, results[0].BillingAddressCity);
-            Assert.AreEqual(request.Accounts[0].CustomFields["Test Account Custom Field 1"], results[0].CustomFields[ChurnZeroCustomField.FormatDisplayNameToCustomFieldName("Test Account Custom Field 1")]);
+            Assert.AreEqual(request.Contacts[0].AccountExternalId, results[0].AccountExternalId);
+            Assert.AreEqual(request.Contacts[0].FirstName ?? string.Empty, results[0].FirstName);
+            Assert.AreEqual(request.Contacts[0].LastName ?? string.Empty, results[0].LastName);
+            Assert.AreEqual(request.Contacts[0].Email ?? string.Empty, results[0].Email );
+            Assert.AreEqual(request.Contacts[0].CustomFields["Test Account Custom Field 1"], results[0].CustomFields[ChurnZeroCustomField.FormatDisplayNameToCustomFieldName("Test Account Custom Field 1")]);
         }
-        private static List<ChurnZeroAccount> GetChurnZeroAccounts(string csvInput)
+   
+        private static List<ChurnZeroContact> GetChurnZeroContacts(string csvInput)
         {
             using var reader = new StringReader(csvInput);
             using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture) { HeaderValidated = null, });
             csv.Read();
             csv.ReadHeader();
-            var results = new List<ChurnZeroAccount>();
+            var results = new List<ChurnZeroContact>();
             while (csv.Read())
             {
-                var account = new ChurnZeroAccount()
+                var account = new ChurnZeroContact()
                 {
                     AccountExternalId = csv.GetField<string>("accountExternalId"),
-                    IsActive = csv.GetField<bool>(nameof(ChurnZeroAccount.IsActive)),
-                    BillingAddressCity = csv.GetField<string>(nameof(ChurnZeroAccount.BillingAddressCity)),
+                    FirstName = csv.GetField<string>(nameof(ChurnZeroContact.FirstName)),
+                    LastName = csv.GetField<string>(nameof(ChurnZeroContact.LastName)),
+                    Email = csv.GetField<string>(nameof(ChurnZeroContact.Email)),
                     CustomFields = new Dictionary<string, string>() { { ChurnZeroCustomField.FormatDisplayNameToCustomFieldName("Test Account Custom Field 1"), csv.GetField<string>(ChurnZeroCustomField.FormatDisplayNameToCustomFieldName("Test Account Custom Field 1"))! } }
                 };
                 results.Add(account);
