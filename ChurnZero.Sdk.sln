@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChurnZero.Sdk", "ChurnZero.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChurnZero.SampleDotnet7Console", "ChurnZero.SampleDotnet7Console\ChurnZero.SampleDotnet7Console.csproj", "{7CCBF5C5-8F18-4C8C-AA85-2331D6FCD2B6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Actions", "{5B061DE6-BDE4-40D4-8AC1-13E8EF4FA214}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\nuget-publish.yml = .github\workflows\nuget-publish.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
