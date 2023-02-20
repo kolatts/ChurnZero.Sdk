@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using ChurnZero.Sdk.Models;
 using ChurnZero.Sdk.Requests;
 using Newtonsoft.Json;
@@ -92,7 +95,41 @@ namespace ChurnZero.Sdk
         /// <param name="timeInApps"></param>
         /// <returns></returns>
         Task<HttpResponseMessage> TrackTimeInAppsAsync(params ChurnZeroTimeInApp[] timeInApps);
-
+        /// <summary>
+        /// Uses the batch upload CSV to update accounts in batch synchronously. Custom fields <i>must</i> be created via <see cref="UpdateAccounts"/> or <see cref="SetAttributes"/> prior to use in batch.
+        /// </summary>
+        /// <param name="accounts">The accounts to update</param>
+        /// <param name="nameOfImport">The filename (referenced in the email, if applicable)</param>
+        /// <param name="emailNotification">The email address to be notified upon completion</param>
+        /// <returns></returns>
+        HttpResponseMessage UpdateAccountsBatch(IEnumerable<ChurnZeroAccount> accounts, string nameOfImport, string emailNotification = null);
+        /// <summary>
+        /// Uses the batch upload CSV to update accounts in batch asynchronously. Custom fields <i>must</i> be created via <see cref="UpdateAccountsAsync"/> or <see cref="SetAttributesAsync"/> prior to use in batch.
+        /// </summary>
+        /// <param name="accounts">The accounts to update</param>
+        /// <param name="nameOfImport">The filename(as referenced in the email, if applicable)</param>
+        /// <param name="emailNotification">The email to be notified upon completion</param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> UpdateAccountsBatchAsync(IEnumerable<ChurnZeroAccount> accounts, string nameOfImport,
+            string emailNotification = null);
+        /// <summary>
+        /// Uses the batch upload CSV to update accounts in batch synchronously. Custom fields <i>must</i> be created via <see cref="UpdateContacts"/> or <see cref="SetAttributes"/> prior to use in batch.
+        /// </summary>
+        /// <param name="contacts">The contacts to update</param>
+        /// <param name="nameOfImport">The filename(as referenced in the email, if applicable)</param>
+        /// <param name="emailNotification">The email to be notified upon completion</param>
+        /// <returns></returns>
+        HttpResponseMessage UpdateContactsBatch(IEnumerable<ChurnZeroContact> contacts, string nameOfImport,
+            string emailNotification = null);
+        /// <summary>
+        /// Uses the batch upload CSV to update accounts in batch asynchronously. Custom fields <i>must</i> be created via <see cref="UpdateContactsAsync"/> or <see cref="SetAttributesAsync"/> prior to use in batch.
+        /// </summary>
+        /// <param name="contacts">The contacts to update</param>
+        /// <param name="nameOfImport">The filename(as referenced in the email, if applicable)</param>
+        /// <param name="emailNotification">The email to be notified upon completion</param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> UpdateContactsBatchAsync(IEnumerable<ChurnZeroContact> contacts, string nameOfImport,
+            string emailNotification = null);
     }
     /// <inheritdoc cref="IChurnZeroHttpApiClient"/>
     public class ChurnZeroHttpApiClient : IChurnZeroHttpApiClient
@@ -118,7 +155,7 @@ namespace ChurnZero.Sdk
             };
         }
 
-     
+
         public HttpResponseMessage UpdateAccounts(params ChurnZeroAccount[] accounts) => UpdateAccountsAsync(accounts).GetAwaiter().GetResult();
         public async Task<HttpResponseMessage> UpdateAccountsAsync(params ChurnZeroAccount[] accounts)
         {
@@ -160,7 +197,7 @@ namespace ChurnZero.Sdk
 
         public async Task<HttpResponseMessage> TrackEventsAsync(params ChurnZeroEvent[] events)
         {
-            var requests = events.Select(x=> new TrackEventRequest(x, _appKey)).ToList();
+            var requests = events.Select(x => new TrackEventRequest(x, _appKey)).ToList();
             var serialized = JsonConvert.SerializeObject(requests, Formatting.Indented, _jsonSerializerSettings);
             var requestContent = new StringContent(serialized, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("i", requestContent);
@@ -176,6 +213,68 @@ namespace ChurnZero.Sdk
             return response;
         }
 
-     
+        public HttpResponseMessage UpdateAccountsBatch(IEnumerable<ChurnZeroAccount> accounts, string nameOfImport,
+            string emailNotification = null) => UpdateAccountsBatchAsync(accounts, nameOfImport, emailNotification)
+            .GetAwaiter().GetResult();
+
+        public async Task<HttpResponseMessage> UpdateAccountsBatchAsync(IEnumerable<ChurnZeroAccount> accounts, string nameOfImport, string emailNotification = null)
+        {
+            var request = new BatchAccountRequest()
+            {
+                Accounts = accounts.ToList(),
+                AppKey = _appKey,
+            };
+            var csvOutput = request.ToCsvOutput();
+            HttpResponseMessage response;
+
+            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(csvOutput)))
+            {
+                using (var fileContent = new StreamContent(memoryStream))
+                {
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+                    using (var formContent = new MultipartFormDataContent())
+                    {
+                        formContent.Add(fileContent, "data", $"{nameOfImport}.csv");
+                        var emailQueryAddition = string.IsNullOrWhiteSpace(emailNotification)
+                            ? $"&email={HttpUtility.UrlEncode(emailNotification)}"
+                            : string.Empty;
+                        response = await _httpClient.PostAsync($"{request.Action}?appKey={_appKey}{emailQueryAddition}", formContent);
+                    }
+                }
+            }
+            return response;
+        }
+
+        public HttpResponseMessage UpdateContactsBatch(IEnumerable<ChurnZeroContact> contacts, string nameOfImport,
+            string emailNotification = null) => UpdateContactsBatchAsync(contacts, nameOfImport, emailNotification)
+            .GetAwaiter().GetResult();
+
+        public async Task<HttpResponseMessage> UpdateContactsBatchAsync(IEnumerable<ChurnZeroContact> contacts, string nameOfImport, string emailNotification = null)
+        {
+            var request = new BatchContactRequest()
+            {
+                Contacts = contacts.ToList(),
+                AppKey = _appKey,
+            };
+            var csvOutput = request.ToCsvOutput();
+            HttpResponseMessage response;
+
+            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(csvOutput)))
+            {
+                using (var fileContent = new StreamContent(memoryStream))
+                {
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+                    using (var formContent = new MultipartFormDataContent())
+                    {
+                        formContent.Add(fileContent, "data", $"{nameOfImport}.csv");
+                        var emailQueryAddition = string.IsNullOrWhiteSpace(emailNotification)
+                            ? $"&email={HttpUtility.UrlEncode(emailNotification)}"
+                            : string.Empty;
+                        response = await _httpClient.PostAsync($"{request.Action}?appKey={_appKey}{emailQueryAddition}", formContent);
+                    }
+                }
+            }
+            return response;
+        }
     }
 }

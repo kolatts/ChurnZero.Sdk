@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Ac
 		.github\workflows\nuget-publish.yml = .github\workflows\nuget-publish.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChurnZero.Sdk.Tests", "ChurnZero.Sdk.Tests\ChurnZero.Sdk.Tests.csproj", "{0411BDFB-9395-49D6-AE56-E1ACAD9014FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{7CCBF5C5-8F18-4C8C-AA85-2331D6FCD2B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CCBF5C5-8F18-4C8C-AA85-2331D6FCD2B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CCBF5C5-8F18-4C8C-AA85-2331D6FCD2B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0411BDFB-9395-49D6-AE56-E1ACAD9014FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0411BDFB-9395-49D6-AE56-E1ACAD9014FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0411BDFB-9395-49D6-AE56-E1ACAD9014FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0411BDFB-9395-49D6-AE56-E1ACAD9014FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

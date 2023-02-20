@@ -29,7 +29,7 @@ namespace ChurnZero.Sdk.Models
         public string OwnerUserAccount { get; set; }
         public string ParentAccountExternalId { get; set; }
         public Dictionary<string,string> CustomFields { get; set; } = new Dictionary<string,string>();
-        public IEnumerable<ChurnZeroAttribute> ToAttributes()
+        internal IEnumerable<ChurnZeroAttribute> ToAttributes(bool prefixCustomFields = false)
         {
             return new List<ChurnZeroAttribute>()
             {
@@ -47,7 +47,7 @@ namespace ChurnZero.Sdk.Models
                 new ChurnZeroAttribute(AccountExternalId, StandardAccountFields.LicenseCount, LicenseCount?.ToString()),
                 new ChurnZeroAttribute(AccountExternalId, StandardAccountFields.OwnerUserAccount, OwnerUserAccount),
                 new ChurnZeroAttribute(AccountExternalId, StandardAccountFields.ParentAccountExternalId, ParentAccountExternalId)
-            }.Union(CustomFields.Select(x=> new ChurnZeroAttribute(x.Key, x.Value, EntityTypes.Account, AccountExternalId))).Where(x => !string.IsNullOrWhiteSpace(x.Value));
+            }.Union(CustomFields.Select(x=> new ChurnZeroAttribute(prefixCustomFields  ? ChurnZeroCustomField.FormatDisplayNameToCustomFieldName(x.Key) : x.Key, x.Value, EntityTypes.Account, AccountExternalId))).Where(x => !string.IsNullOrWhiteSpace(x.Value));
         }
     }
 }

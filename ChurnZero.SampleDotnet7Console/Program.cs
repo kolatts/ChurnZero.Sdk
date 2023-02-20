@@ -13,7 +13,9 @@ var client = new ChurnZeroHttpApiClient(new HttpClient() { BaseAddress = new Uri
 
 //Usage
 const string testAccountIdentifier = "Test Account ID";
+const string testAccountIdentifier2 = "Test Account ID 2";
 const string testContactIdentifier = "Test Contact ID";
+const string testContactIdentifier2 = "Test Contact ID 2";
 
 //Creates your customer's Account in Churn Zero or adjusts fields based on values supplied. CRM integration instead is recommended.
 var accountResponse = await client.UpdateAccountsAsync(
@@ -31,6 +33,38 @@ var accountResponse = await client.UpdateAccountsAsync(
 );
 Console.WriteLine($"Received {accountResponse.StatusCode} creating account");
 
+//Performs the same add/update for Accounts in Churn Zero but scales much larger (500 MB file size).
+//A 200 response may be returned, but since the accounts are processed separately from the API request, an email notification will indicate the success/failure of the import.
+//Custom fields need to be added via non-batch methods first.
+var accountBatchResponse = await client.UpdateAccountsBatchAsync(
+    new List<ChurnZeroAccount>() {
+        new ChurnZeroAccount()
+    {
+        AccountExternalId = testAccountIdentifier,
+        Name = "Test Customer Account",
+        BillingAddressLine1 = "321 Test Drive",
+        BillingAddressLine2 = "Suite 2",
+        BillingAddressCity = "Testerland",
+        BillingAddressState = "Test",
+        StartDate = DateTime.Now,
+        CustomFields = new Dictionary<string, string>() { { "Test Custom Field", "Test Custom Field Value 1" } }
+    },
+    new ChurnZeroAccount()
+    {
+        AccountExternalId = testAccountIdentifier2,
+        Name = "Test Customer Account 2",
+        BillingAddressLine1 = "123 Test Drive",
+        BillingAddressLine2 = "Suite 3",
+        BillingAddressCity = "Testerville",
+        BillingAddressState = "Test",
+        StartDate = DateTime.Now,
+        CustomFields = new Dictionary<string, string>() { { "Test Custom Field", "Test Custom Field Value 2" } }
+    },
+    }, "testAccountImport"
+);
+Console.WriteLine($"Received {accountBatchResponse.StatusCode} account batch add/update");
+
+
 //Creates your customer Account's Contact in Churn Zero or adjusts fields based on values supplied. Must have an Account created first.
 var contactResponse = await client.UpdateContactsAsync(new ChurnZeroContact()
 {
@@ -43,10 +77,37 @@ var contactResponse = await client.UpdateContactsAsync(new ChurnZeroContact()
 });
 Console.WriteLine($"Received {contactResponse.StatusCode} creating contact");
 
+
+//Performs the same add/update for Accounts in Churn Zero but scales much larger (500 MB file size).
+//A 200 response may be returned, but since the contacts are processed separately from the API request, an email notification will indicate the success/failure of the import.
+//Custom fields need to be added via non-batch methods first.
+var contactBatchResponse = await client.UpdateContactsBatchAsync(new List<ChurnZeroContact>()
+{
+    new ChurnZeroContact()
+    {
+        AccountExternalId = testAccountIdentifier,
+        ContactExternalId = testContactIdentifier,
+        FirstName = "Sunny",
+        LastName = "Tester",
+        Email = "test@test.com",
+        CustomFields = new Dictionary<string, string>() {{"Test Custom Field Value 1", "0"}}
+    },
+    new ChurnZeroContact()
+    {
+        AccountExternalId = testAccountIdentifier2,
+        ContactExternalId = testContactIdentifier2,
+        FirstName = "Joe",
+        LastName = "Tester",
+        Email = "test@test.com",
+        CustomFields = new Dictionary<string, string>() {{"Test Custom Field Value 1", "2"}}
+    }
+}, "testContactImport");
+Console.WriteLine($"Received {contactBatchResponse.StatusCode} contact batch add/update");
+
 //Increments numeric attributes of accounts and contacts.
 var incrementResponse = await client.IncrementAttributesAsync(
-    new ChurnZeroAttribute(testAccountIdentifier, StandardAccountFields.LicenseCount, 1.ToString()),
-    new ChurnZeroAttribute("Test Custom Field Value 2", 5.ToString(), EntityTypes.Contact, testAccountIdentifier,
+    new ChurnZeroAttribute(testAccountIdentifier, StandardAccountFields.LicenseCount, "1"),
+    new ChurnZeroAttribute("Test Custom Field Value 2", "5", EntityTypes.Contact, testAccountIdentifier,
         testContactIdentifier));
 Console.WriteLine($"Received {incrementResponse.StatusCode} incrementing attributes");
 
